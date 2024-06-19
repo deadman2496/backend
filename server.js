@@ -3,6 +3,7 @@ const mongoose = require('mongoose')
 const UserModel = require('./userDetails')
 require('dotenv').config()
 const app = express()
+app.use(express.json())
 
 mongoose.connect(process.env.MONGO_URL)
 .then(() => console.log("connection successful"))
