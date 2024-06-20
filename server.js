@@ -5,6 +5,7 @@ import cookieParser from "cookie-parser";
 const { compare } = pkg;
 import dotenv from "dotenv";
 import UserModel from "./models/users.js";
+import ImageModel from "./models/images.js";
 import { setAuthCookies, generateAuthToken } from "./auth.js";
 
 dotenv.config();
@@ -117,6 +118,27 @@ app.post("/logout", (req, res) => {
   }
 });
 
+
+
+// TODO add POST user images route which will add a document to the database with the user id and image name, URL, price, view count and description
+
+
+
+// TODO setup GET all user images by user id (_id) route
+// app.get('/user-images', async (req, res, _id) => {
+
+//     // const user = await UserModel.findOne({ email }).select("+password");
+//     userImages = await ImageModel.find({ _id})
+//     });
+
+
+
+// TODO add PATCH route to edit user image by id  which will edit that document to the database with the user id and image name, URL, price, view count and description
+
+// TODO add a delete user image route to delete a image by image id
+
 app.listen(4000, () => {
   console.log(`connected to port 4000`);
 });
+
+
