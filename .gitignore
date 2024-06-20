@@ -1,0 +1,5 @@
+# excludes node_modules from github
+node_modules
+
+# excludes .env from github
+.env
