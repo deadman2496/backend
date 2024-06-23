@@ -1,5 +1,5 @@
 import jwt from "jsonwebtoken";
-import UserModel from "./models/users.js";
+import UserModel from "../models/users.js";
 import dotenv from "dotenv";
 
 dotenv.config();
@@ -26,22 +26,29 @@ export const setAuthCookies = (res, value) => {
   });
 };
 
-export const isUserAuthorized = async (req) => {
+export const isUserAuthorized = async (req, res, next) => {
   const token = req.cookies["auth-token"];
 
-  let user;
-
   if (token) {
-    const data = jwt.verify(token, JWT_SECRET);
+    try {
+      const data = jwt.verify(token, JWT_SECRET);
 
-    if (typeof data !== "string") {
-      user = await UserModel.findById(data._id).catch((error) => {
-        console.error("Error finding user:", error);
-        return null;
-      });
+      if (typeof data !== "string") {
+        const user = await UserModel.findById(data._id).catch((error) => {
+          console.error("Error finding user:", error);
+          return null;
+        });
 
-      return user;
+        if (user) {
+          req.user = user;
+          req.token = token;
+          return next();
+        }
+      }
+    } catch (error) {
+      console.error("Token verification error:", error);
     }
   }
-  return null;
+
+  return res.status(401).json({ success: false, error: "Unauthorized" });
 };
