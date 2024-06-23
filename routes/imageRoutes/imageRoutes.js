@@ -1,8 +1,8 @@
 import express from "express";
 import bcrypt from "bcryptjs";
 import mongoose from "mongoose";
-import ImageModel from "../models/images.js";
-import { isUserAuthorized } from "../utils/authUtils.js";
+import ImageModel from "../../models/images.js";
+import { isUserAuthorized } from "../../utils/authUtils.js";
 
 const router = express.Router();
 

@@ -2,8 +2,8 @@ import express from "express";
 import mongoose from "mongoose";
 import cookieParser from "cookie-parser";
 import { MONGO_URL } from "./config/config.js";
-import authRoutes from "./routes/authRoutes.js";
-import imageRoutes from "./routes/imageRoutes.js";
+import authRoutes from "./routes/authRoutes/authRoutes.js";
+import imageRoutes from "./routes/imageRoutes/imageRoutes.js";
 
 const app = express();
 app.use(express.json());

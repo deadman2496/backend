@@ -2,8 +2,8 @@ import express from "express";
 import bcrypt from "bcryptjs";
 import mongoose from "mongoose";
 const { compare } = bcrypt;
-import UserModel from "../models/users.js";
-import { setAuthCookies, generateAuthToken } from "../utils/authUtils.js";
+import UserModel from "../../models/users.js";
+import { setAuthCookies, generateAuthToken } from "../../utils/authUtils.js";
 
 const router = express.Router();
 
