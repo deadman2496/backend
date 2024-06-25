@@ -11,8 +11,6 @@ app.use(cookieParser());
 app.use("/", authRoutes);
 app.use("/", imageRoutes);
 
-const router = express.Router();
-
 const PORT = 4000;
 
 mongoose
@@ -24,7 +22,7 @@ mongoose
   });
 
 // req = request, res = response
-router.get("/", (req, res) => {
+app.get("/", (req, res) => {
   res.send({ status: "working" });
 });
 app.listen(PORT, () => {
