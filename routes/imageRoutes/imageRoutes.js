@@ -94,8 +94,20 @@ router.patch("/image/:id", isUserAuthorized, async (req, res) => {
     // Finding and updating the image document in the database
     const updatedImage = await ImageModel.findOneAndUpdate(
       { _id: imageId, userId },
-      { name, imageURL, price, description },
-      { new: true, runValidators: true }
+      {
+        name,
+        imageURL,
+        price,
+        description,
+        // increments version key
+        $inc: { __v: 1 },
+      },
+      // return the new or updated document
+      {
+        new: true,
+        // makes sure the updated document follows model schema validations
+        runValidators: true,
+      }
     );
 
     // If the image is not found, sending a 404 response

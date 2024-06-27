@@ -53,7 +53,7 @@ const UserSchema = new Schema(
   {
     // Add timestamps for createdAt and updatedAt
     timestamps: true,
-    versionKey: false,
+    versionKey: "__v",
   }
 );
 

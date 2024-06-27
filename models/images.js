@@ -74,7 +74,8 @@ const ImageSchema = new Schema(
   {
     // Add timestamps for createdAt and updatedAt
     timestamps: true,
-    versionKey: false,
+    // Add version key keeping track of updates
+    versionKey: "__v",
   }
 );
 
