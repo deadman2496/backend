@@ -3,3 +3,6 @@ node_modules
 
 # excludes .env from github
 .env
+
+# excludes test-results from github
+test-results
