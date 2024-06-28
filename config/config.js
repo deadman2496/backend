@@ -17,3 +17,13 @@ if (!MONGO_URL) {
   // Log that MONGO_URL is loaded
   console.log("MONGO_URL loaded");
 }
+
+if (!JWT_SECRET) {
+    // Log the value of JWT_SECRET (which will be undefined)
+    console.log("JWT_SECRET", JWT_SECRET);
+    // Throw an error if JWT_SECRET is not set
+    throw new Error("Invalid env variable: JWT_SECRET");
+  } else {
+    // Log that JWT_SECRET is loaded
+    console.log("JWT_SECRET loaded");
+  }

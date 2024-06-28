@@ -67,7 +67,7 @@ UserSchema.pre("save", async function(next) {
 });
 
 // Create the User model using the UserSchema, or retrieve it if it already exists
-const User = mongoose.models.User || mongoose.model("User", UserSchema);
+const UserModel = mongoose.models.UserModel || mongoose.model("User", UserSchema);
 
 // Export the User model
-export default User;
+export default UserModel;

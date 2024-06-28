@@ -57,12 +57,12 @@ router.post("/image", isUserAuthorized, async (req, res) => {
 router.get("/image/:id", isUserAuthorized, async (req, res) => {
   try {
     // Getting the userId from the authenticated user
-    const userId = req.user._id;
+    const userId = req.user.id;
     // Getting the imageId from the request parameters
     const imageId = req.params.id;
 
     // Finding the image document in the database
-    const image = await ImageModel.findOne({ _id: imageId, userId });
+    const image = await ImageModel.findOne({ _id: imageId, userId: userId });
 
     // If the image is not found, sending a 404 response
     if (!image) {
@@ -85,7 +85,7 @@ router.get("/image/:id", isUserAuthorized, async (req, res) => {
 router.patch("/image/:id", isUserAuthorized, async (req, res) => {
   try {
     // Getting the userId from the authenticated user
-    const userId = req.user._id;
+    const userId = req.user.id;
     // Getting the imageId from the request parameters
     const imageId = req.params.id;
     // Destructuring the fields to update from the request body
@@ -93,7 +93,7 @@ router.patch("/image/:id", isUserAuthorized, async (req, res) => {
 
     // Finding and updating the image document in the database
     const updatedImage = await ImageModel.findOneAndUpdate(
-      { _id: imageId, userId },
+      { _id: imageId, userId: userId },
       {
         name,
         imageURL,
@@ -144,7 +144,7 @@ router.patch("/image/:id", isUserAuthorized, async (req, res) => {
 router.delete("/image/:id", isUserAuthorized, async (req, res) => {
   try {
     // Getting the userId from the authenticated user
-    const userId = req.user._id;
+    const userId = req.user.id;
     // Getting the imageId from the request parameters
     const imageId = req.params.id;
 
@@ -165,7 +165,7 @@ router.delete("/image/:id", isUserAuthorized, async (req, res) => {
     // Finding and deleting the image document in the database
     const deletedImage = await ImageModel.findOneAndDelete({
       _id: imageId,
-      userId,
+      userId: userId
     });
 
     // If the image is not found, sending a 404 response
@@ -189,10 +189,10 @@ router.delete("/image/:id", isUserAuthorized, async (req, res) => {
 router.get("/images", isUserAuthorized, async (req, res) => {
   try {
     // Getting the userId from the authenticated user
-    const userId = req.user._id;
+    const userId = req.user.id;
 
     // Finding all image documents for the user in the database
-    const images = await ImageModel.find({ userId });
+    const images = await ImageModel.find({ userId: userId });
 
     // Sending a success response with the images data
     res.status(200).json({ success: true, images });

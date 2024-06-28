@@ -80,7 +80,7 @@ const ImageSchema = new Schema(
 );
 
 // Create the Image model using the ImageSchema, or retrieve it if it already exists
-const Image = mongoose.models.Image || mongoose.model("Image", ImageSchema);
+const ImageModel = mongoose.models.ImageModel || mongoose.model("Image", ImageSchema);
 
 // Export the Image model
-export default Image;
+export default ImageModel;
