@@ -4,26 +4,23 @@ import express from "express";
 // Importing the mongoose module
 import mongoose from "mongoose";
 
+// Importing the multer module
+import multer from "multer";
+
 // Importing the ImageModel from the models directory
 import ImageModel from "../../models/images.js";
 
 // Importing the isUserAuthorized function from the utils directory
 import { isUserAuthorized } from "../../utils/authUtils.js";
 
-// Importing the multer module
-import multer from "multer";
-
-// Importing the fs module
-import fs from "fs";
+// Create a router instance with the router configuration
+const router = express.Router();
 
 // Store files in memory as Buffer objects
 const storage = multer.memoryStorage();
 
 // Create a multer instance with the storage configuration
 const upload = multer({ storage: storage });
-
-// Create a router instance with the router configuration
-const router = express.Router();
 
 // POST route for uploading an image
 router.post(
@@ -95,7 +92,6 @@ router.get("/image/:id", isUserAuthorized, async (req, res) => {
   }
 });
 
-// TODO update image route needs to be fixed
 // Route to update an image by id
 router.patch(
   "/image/:id",
@@ -104,33 +100,29 @@ router.patch(
   async (req, res, next) => {
     try {
       // Getting the userId from the authenticated user
-      const userId = req.user.id;
+      const userId = req.user._id;
       // Getting the imageId from the request parameters
       const imageId = req.params.id;
-      // Destructuring the fields to update from the request body
-      // const { name, imageFile, price, description } = req.body;
+
+      // Prepare the update object
+      const updateImage = {};
+      if (req.body.name) updateImage.name = req.body.name;
+      if (req.file) {
+        updateImage.imageFile = {
+          data: req.file.buffer,
+          contentType: req.file.mimetype,
+        };
+      }
+      if (req.body.price) updateImage.price = req.body.price;
+      if (req.body.description) updateImage.description = req.body.description;
+      // Increment the version key
+      updateImage.$inc = { __v: 1 };
 
       // Finding and updating the image document in the database
       const updatedImage = await ImageModel.findOneAndUpdate(
         { _id: imageId, userId: userId },
-
-        {
-          name: req.body.name,
-          imageFile: {
-            data: fs.readFileSync(req.file.path),
-            contentType: req.file.mimetype,
-          },
-          price: req.body.price,
-          description: req.body.description,
-          // increments version key
-          $inc: { __v: 1 },
-        },
-        // return the new or updated document
-        {
-          new: true,
-          // makes sure the updated document follows model schema validations
-          runValidators: true,
-        }
+        updateImage,
+        { new: true, runValidators: true }
       );
 
       // If the image is not found, sending a 404 response

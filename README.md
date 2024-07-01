@@ -8,4 +8,4 @@ Then enter the command: ```git clone git@github.com:Immpression-Dev-Team/Backend
 
 Install the dependencies with the command ```npm install```
 
-To run the app use the command ```npm run dev``` to run nodemon or ```npm start```
+To run the app use the command ```npm run dev``` to run server with nodemon or ```npm start``` to run the server without nodemon
