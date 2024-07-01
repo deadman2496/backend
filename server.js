@@ -16,6 +16,11 @@ import imageRoutes from "./routes/imageRoutes/imageRoutes.js";
 // Import the MongoDB connection URL from config file
 import { MONGO_URL } from "./config/config.js";
 
+import bodyParser from "body-parser";
+
+import fs from "fs";
+import path from "path";
+
 // Create an Express application
 const app = express();
 
@@ -30,6 +35,12 @@ app.use("/", authRoutes);
 
 // Use image routes for root path
 app.use("/", imageRoutes);
+
+app.set("view engine", "ejs");
+
+app.use(bodyParser.urlencoded({ extended: false }));
+
+app.use(bodyParser.json());
 
 // Define the server port number
 const PORT = 4000;

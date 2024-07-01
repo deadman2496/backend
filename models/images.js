@@ -23,30 +23,17 @@ const ImageSchema = new Schema(
       // Maximum length of 30 characters with a custom error message
       maxLength: [30, "Name should be less than 30 characters"],
     },
-    // Define the imageURL field with type String, uniqueness, and validation
-    imageURL: {
-      type: String,
-      // imageURL must be unique
-      unique: true,
-      // imageURL is required with a custom error message
-      required: [true, "Image URL is required"],
-      validate: {
-        validator: function(value) {
-          // Regular expression to validate URL format
-          const urlRegex = /^(http|https):\/\/[^ "]+$/;
-          return urlRegex.test(value);
-        },
-        // Custom error message for invalid URL format
-        message: "Invalid URL",
-      },
+    // Define the imageFile field with type String, uniqueness, and validation
+    imageFile: {
+      data: Buffer,
+      contentType: String,
     },
     // Define the price field with type String and validation
     price: {
       type: String,
       // price is required with a custom error message
       required: [true, "Price is required"],
-      // price field will not be selected by default in queries
-      select: false,
+
       // Minimum value of 1 with a custom error message
       min: [1, "Price should be greater than $0.99"],
       // Maximum value of 1,000,000 with a custom error message
@@ -80,7 +67,8 @@ const ImageSchema = new Schema(
 );
 
 // Create the Image model using the ImageSchema, or retrieve it if it already exists
-const ImageModel = mongoose.models.ImageModel || mongoose.model("Image", ImageSchema);
+const ImageModel =
+  mongoose.models.ImageModel || mongoose.model("Image", ImageSchema);
 
 // Export the Image model
 export default ImageModel;

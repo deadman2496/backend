@@ -10,135 +10,159 @@ import ImageModel from "../../models/images.js";
 // Importing the isUserAuthorized function from the utils directory
 import { isUserAuthorized } from "../../utils/authUtils.js";
 
-// Creating a new router instance
+// Importing the multer module
+import multer from "multer";
+
+// Importing the fs module
+import fs from "fs";
+
+// Store files in memory as Buffer objects
+const storage = multer.memoryStorage();
+
+// Create a multer instance with the storage configuration
+const upload = multer({ storage: storage });
+
+// Create a router instance with the router configuration
 const router = express.Router();
 
-// Route to add a new image
-router.post("/image", isUserAuthorized, async (req, res) => {
-  try {
-    // Destructuring the necessary fields from the request body
-    const { name, imageURL, price, description } = req.body;
-    // Getting the userId from the authenticated user
-    const userId = req.user._id;
+// POST route for uploading an image
+router.post(
+  "/image",
+  upload.single("image"),
+  isUserAuthorized,
+  async (req, res) => {
+    try {
+      // Getting the userId from the authenticated user
+      const userId = req.user._id;
 
-    // Creating a new image document in the database
-    const newImage = await ImageModel.create({
-      userId,
-      name,
-      imageURL,
-      price,
-      description,
-    });
+      // Create a new image document in the database
+      const newImage = await ImageModel.create({
+        userId: userId,
+        name: req.body.name,
+        imageFile: {
+          data: req.file.buffer, // Store file buffer directly
+          contentType: req.file.mimetype,
+        },
+        price: req.body.price,
+        description: req.body.description,
+      });
 
-    // Logging a success message to the console
-    console.log("New image added successfully");
-
-    // Sending a success response to the client
-    res
-      .status(200)
-      .json({ success: true, message: "Image added successfully" });
-  } catch (error) {
-    // Handling validation errors from mongoose
-    if (error instanceof mongoose.Error.ValidationError) {
-      for (let field in error.errors) {
-        const message = error.errors[field].message;
-        return res.status(400).json({ success: false, message });
-      }
+      // Sending a success response after image upload
+      res
+        .status(200)
+        .json({ success: true, message: "Image uploaded successfully" });
+    } catch (err) {
+      // Handling errors and sending an error response
+      console.error(err);
+      res.status(500).json({ success: false, error: err.message });
     }
-
-    // Logging the error to the console
-    console.error(error);
-    // Sending an internal server error response to the client
-    res.status(500).json({ success: false, error: "Internal Server Error" });
   }
-});
+);
 
-// Route to get an image by id
+// GET route for fetching an image by ID
 router.get("/image/:id", isUserAuthorized, async (req, res) => {
   try {
     // Getting the userId from the authenticated user
-    const userId = req.user.id;
-    // Getting the imageId from the request parameters
+    const userId = req.user._id;
+
+    // Get the image ID from the request parameters
     const imageId = req.params.id;
 
-    // Finding the image document in the database
+    // Find the image in the database by its ID and user ID
     const image = await ImageModel.findOne({ _id: imageId, userId: userId });
 
-    // If the image is not found, sending a 404 response
     if (!image) {
-      return res
-        .status(404)
-        .json({ success: false, error: "Image not found or not authorized" });
+      return res.status(404).json({ success: false, error: "Image not found" });
     }
 
-    // Sending a success response with the image data
-    res.status(200).json({ success: true, image });
-  } catch (error) {
-    // Logging the error to the console
-    console.error("Error fetching image:", error);
-    // Sending an internal server error response to the client
-    res.status(500).json({ success: false, error: "Internal Server Error" });
-  }
-});
-
-// Route to update an image by id
-router.patch("/image/:id", isUserAuthorized, async (req, res) => {
-  try {
-    // Getting the userId from the authenticated user
-    const userId = req.user.id;
-    // Getting the imageId from the request parameters
-    const imageId = req.params.id;
-    // Destructuring the fields to update from the request body
-    const { name, imageURL, price, description } = req.body;
-
-    // Finding and updating the image document in the database
-    const updatedImage = await ImageModel.findOneAndUpdate(
-      { _id: imageId, userId: userId },
-      {
-        name,
-        imageURL,
-        price,
-        description,
-        // increments version key
-        $inc: { __v: 1 },
+    // Prepare the response object
+    const responseData = {
+      _id: image._id,
+      name: image.name,
+      description: image.description,
+      price: image.price,
+      imageData: {
+        contentType: image.imageFile.contentType,
+        data: image.imageFile.data.toString("base64"), // Convert Buffer to base64 string
       },
-      // return the new or updated document
-      {
-        new: true,
-        // makes sure the updated document follows model schema validations
-        runValidators: true,
-      }
-    );
+    };
 
-    // If the image is not found, sending a 404 response
-    if (!updatedImage) {
-      return res.status(404).json({
-        success: false,
-        error: "Image not found or not authorized to edit",
-      });
-    }
-
-    // Sending a success response with the updated image data
-    res.status(200).json({
-      success: true,
-      msg: "Image updated successfully",
-      image: updatedImage,
-    });
-  } catch (error) {
-    // Handling validation errors from mongoose
-    if (error instanceof mongoose.Error.ValidationError) {
-      for (let field in error.errors) {
-        const msg = error.errors[field].message;
-        return res.status(400).json({ success: false, msg });
-      }
-    }
-
-    // Logging the error to the console
-    console.error("Error updating image:", error);
-    // Sending an internal server error response to the client
-    res.status(500).json({ success: false, error: "Internal Server Error" });
+    // Send the combined JSON response
+    res.json(responseData);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, error: err.message });
   }
 });
+
+// TODO update image route needs to be fixed
+// Route to update an image by id
+router.patch(
+  "/image/:id",
+  upload.single("image"),
+  isUserAuthorized,
+  async (req, res, next) => {
+    try {
+      // Getting the userId from the authenticated user
+      const userId = req.user.id;
+      // Getting the imageId from the request parameters
+      const imageId = req.params.id;
+      // Destructuring the fields to update from the request body
+      // const { name, imageFile, price, description } = req.body;
+
+      // Finding and updating the image document in the database
+      const updatedImage = await ImageModel.findOneAndUpdate(
+        { _id: imageId, userId: userId },
+
+        {
+          name: req.body.name,
+          imageFile: {
+            data: fs.readFileSync(req.file.path),
+            contentType: req.file.mimetype,
+          },
+          price: req.body.price,
+          description: req.body.description,
+          // increments version key
+          $inc: { __v: 1 },
+        },
+        // return the new or updated document
+        {
+          new: true,
+          // makes sure the updated document follows model schema validations
+          runValidators: true,
+        }
+      );
+
+      // If the image is not found, sending a 404 response
+      if (!updatedImage) {
+        return res.status(404).json({
+          success: false,
+          error: "Image not found or not authorized to edit",
+        });
+      }
+
+      // Sending a success response with the updated image data
+      res.status(200).json({
+        success: true,
+        msg: "Image updated successfully",
+        image: updatedImage,
+      });
+    } catch (error) {
+      // Handling validation errors from mongoose
+      if (error instanceof mongoose.Error.ValidationError) {
+        for (let field in error.errors) {
+          const msg = error.errors[field].message;
+          return res.status(400).json({ success: false, msg });
+        }
+      }
+
+      // Logging the error to the console
+      console.error("Error updating image:", error);
+      // Sending an internal server error response to the client
+      res.status(500).json({ success: false, error: "Internal Server Error" });
+    }
+  }
+);
 
 // Route to delete an image by id
 router.delete("/image/:id", isUserAuthorized, async (req, res) => {
@@ -165,7 +189,7 @@ router.delete("/image/:id", isUserAuthorized, async (req, res) => {
     // Finding and deleting the image document in the database
     const deletedImage = await ImageModel.findOneAndDelete({
       _id: imageId,
-      userId: userId
+      userId: userId,
     });
 
     // If the image is not found, sending a 404 response
