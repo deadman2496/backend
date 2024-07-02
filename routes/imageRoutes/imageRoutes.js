@@ -27,49 +27,51 @@ router.post(
   "/image",
   upload.single("image"),
   isUserAuthorized,
-  async (req, res) => {
+  async (request, response) => {
     try {
       // Getting the userId from the authenticated user
-      const userId = req.user._id;
+      const userId = request.user._id;
 
       // Create a new image document in the database
       const newImage = await ImageModel.create({
         userId: userId,
-        name: req.body.name,
+        name: request.body.name,
         imageFile: {
-          data: req.file.buffer, // Store file buffer directly
-          contentType: req.file.mimetype,
+          data: request.file.buffer, // Store file buffer directly
+          contentType: request.file.mimetype,
         },
-        price: req.body.price,
-        description: req.body.description,
+        price: request.body.price,
+        description: request.body.description,
       });
 
       // Sending a success response after image upload
-      res
+      response
         .status(200)
         .json({ success: true, message: "Image uploaded successfully" });
     } catch (err) {
       // Handling errors and sending an error response
       console.error(err);
-      res.status(500).json({ success: false, error: err.message });
+      response.status(500).json({ success: false, error: err.message });
     }
   }
 );
 
 // GET route for fetching an image by ID
-router.get("/image/:id", isUserAuthorized, async (req, res) => {
+router.get("/image/:id", isUserAuthorized, async (request, response) => {
   try {
     // Getting the userId from the authenticated user
-    const userId = req.user._id;
+    const userId = request.user._id;
 
     // Get the image ID from the request parameters
-    const imageId = req.params.id;
+    const imageId = request.params.id;
 
     // Find the image in the database by its ID and user ID
     const image = await ImageModel.findOne({ _id: imageId, userId: userId });
 
     if (!image) {
-      return res.status(404).json({ success: false, error: "Image not found" });
+      return response
+        .status(404)
+        .json({ success: false, error: "Image not found" });
     }
 
     // Prepare the response object
@@ -85,10 +87,10 @@ router.get("/image/:id", isUserAuthorized, async (req, res) => {
     };
 
     // Send the combined JSON response
-    res.json(responseData);
+    response.json(responseData);
   } catch (err) {
     console.error(err);
-    res.status(500).json({ success: false, error: err.message });
+    response.status(500).json({ success: false, error: err.message });
   }
 });
 
@@ -97,24 +99,25 @@ router.patch(
   "/image/:id",
   upload.single("image"),
   isUserAuthorized,
-  async (req, res, next) => {
+  async (request, response, next) => {
     try {
       // Getting the userId from the authenticated user
-      const userId = req.user._id;
+      const userId = request.user._id;
       // Getting the imageId from the request parameters
-      const imageId = req.params.id;
+      const imageId = request.params.id;
 
       // Prepare the update object
       const updateImage = {};
-      if (req.body.name) updateImage.name = req.body.name;
-      if (req.file) {
+      if (request.body.name) updateImage.name = request.body.name;
+      if (request.file) {
         updateImage.imageFile = {
-          data: req.file.buffer,
-          contentType: req.file.mimetype,
+          data: request.file.buffer,
+          contentType: request.file.mimetype,
         };
       }
-      if (req.body.price) updateImage.price = req.body.price;
-      if (req.body.description) updateImage.description = req.body.description;
+      if (request.body.price) updateImage.price = request.body.price;
+      if (request.body.description)
+        updateImage.description = request.body.description;
       // Increment the version key
       updateImage.$inc = { __v: 1 };
 
@@ -127,14 +130,14 @@ router.patch(
 
       // If the image is not found, sending a 404 response
       if (!updatedImage) {
-        return res.status(404).json({
+        return response.status(404).json({
           success: false,
           error: "Image not found or not authorized to edit",
         });
       }
 
       // Sending a success response with the updated image data
-      res.status(200).json({
+      response.status(200).json({
         success: true,
         msg: "Image updated successfully",
         image: updatedImage,
@@ -144,36 +147,38 @@ router.patch(
       if (error instanceof mongoose.Error.ValidationError) {
         for (let field in error.errors) {
           const msg = error.errors[field].message;
-          return res.status(400).json({ success: false, msg });
+          return response.status(400).json({ success: false, msg });
         }
       }
 
       // Logging the error to the console
       console.error("Error updating image:", error);
       // Sending an internal server error response to the client
-      res.status(500).json({ success: false, error: "Internal Server Error" });
+      response
+        .status(500)
+        .json({ success: false, error: "Internal Server Error" });
     }
   }
 );
 
 // Route to delete an image by id
-router.delete("/image/:id", isUserAuthorized, async (req, res) => {
+router.delete("/image/:id", isUserAuthorized, async (request, response) => {
   try {
     // Getting the userId from the authenticated user
-    const userId = req.user.id;
+    const userId = request.user.id;
     // Getting the imageId from the request parameters
-    const imageId = req.params.id;
+    const imageId = request.params.id;
 
     // If userId is not provided, sending a 401 response
     if (!userId) {
-      return res
+      return response
         .status(401)
         .json({ success: false, error: "User not authorized" });
     }
 
     // If imageId is not provided, sending a 400 response
     if (!imageId) {
-      return res
+      return response
         .status(400)
         .json({ success: false, error: "Image ID is required" });
     }
@@ -186,37 +191,43 @@ router.delete("/image/:id", isUserAuthorized, async (req, res) => {
 
     // If the image is not found, sending a 404 response
     if (!deletedImage) {
-      return res.status(404).json({ success: false, error: "Image not found" });
+      return response
+        .status(404)
+        .json({ success: false, error: "Image not found" });
     }
 
     // Sending a success response indicating the image was deleted
-    res
+    response
       .status(200)
       .json({ success: true, message: "Image deleted successfully" });
   } catch (error) {
     // Logging the error to the console
     console.error("Error deleting image:", error);
     // Sending an internal server error response to the client
-    res.status(500).json({ success: false, error: "Internal Server Error" });
+    response
+      .status(500)
+      .json({ success: false, error: "Internal Server Error" });
   }
 });
 
 // Route to get all images for the authenticated user
-router.get("/images", isUserAuthorized, async (req, res) => {
+router.get("/images", isUserAuthorized, async (request, response) => {
   try {
     // Getting the userId from the authenticated user
-    const userId = req.user.id;
+    const userId = request.user.id;
 
     // Finding all image documents for the user in the database
     const images = await ImageModel.find({ userId: userId });
 
     // Sending a success response with the images data
-    res.status(200).json({ success: true, images });
+    response.status(200).json({ success: true, images });
   } catch (error) {
     // Logging the error to the console
     console.error("Error fetching images:", error);
     // Sending an internal server error response to the client
-    res.status(500).json({ success: false, error: "Internal Server Error" });
+    response
+      .status(500)
+      .json({ success: false, error: "Internal Server Error" });
   }
 });
 

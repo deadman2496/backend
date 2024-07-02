@@ -20,17 +20,18 @@ import { setAuthCookies, generateAuthToken } from "../../utils/authUtils.js";
 const router = express.Router();
 
 // Route for user signup
-router.post("/signup", async (req, res) => {
+router.post("/signup", async (request, response) => {
   try {
     // Destructure name, email, and password from the request body
-    const { name, email, password } = req.body;
+    // TODO: we confirm email setup here so we pass email 2 times and they match
+    const { name, email, password } = request.body;
 
     // Check if a user with the given email already exists
     const userExists = await UserModel.findOne({ email });
 
     // If the user exists, return a 409 conflict status
     if (userExists) {
-      return res
+      return response
         .status(409)
         .json({ success: false, error: "User already exists" });
     }
@@ -46,38 +47,40 @@ router.post("/signup", async (req, res) => {
     console.log("New user created successfully");
 
     // Respond with a success message
-    res.status(200).json({ success: true, message: "Signup successful" });
+    response.status(200).json({ success: true, message: "Signup successful" });
   } catch (error) {
     // Handle Mongoose validation errors
     if (error instanceof mongoose.Error.ValidationError) {
       for (let field in error.errors) {
         const message = error.errors[field].message;
-        return res.status(400).json({ success: false, message });
+        return response.status(400).json({ success: false, message });
       }
     }
 
     // Log and respond with an internal server error for other errors
     console.error(error);
-    res.status(500).json({ success: false, error: "Internal Server Error" });
+    response
+      .status(500)
+      .json({ success: false, error: "Internal Server Error" });
   }
 });
 
 // Route for user login
-router.post("/login", async (req, res) => {
+router.post("/login", async (request, response) => {
   try {
     // Destructure email and password from the request body
-    const { email, password } = req.body;
+    const { email, password } = request.body;
 
     // Check if email is provided
     if (!email) {
-      return res
+      return response
         .status(400)
         .json({ success: false, error: "Email is required" });
     }
 
     // Check if password is provided
     if (!password) {
-      return res
+      return response
         .status(400)
         .json({ success: false, error: "Password is required" });
     }
@@ -87,7 +90,9 @@ router.post("/login", async (req, res) => {
 
     // If the user is not found, return a 404 not found status
     if (!user) {
-      return res.status(404).json({ success: false, error: "User not found" });
+      return response
+        .status(404)
+        .json({ success: false, error: "User not found" });
     }
 
     // Compare the provided password with the stored hashed password
@@ -95,7 +100,7 @@ router.post("/login", async (req, res) => {
 
     // If the password is incorrect, return a 401 unauthorized status
     if (!isPasswordCorrect) {
-      return res
+      return response
         .status(401)
         .json({ success: false, error: "Incorrect password" });
     }
@@ -104,33 +109,35 @@ router.post("/login", async (req, res) => {
     const authToken = generateAuthToken(user._id);
 
     // Set the authentication cookies in the response
-    setAuthCookies(res, authToken);
+    setAuthCookies(response, authToken);
 
     // Respond with a success message
-    res
-      .status(200)
-      .json({ success: true, message: "Login successful", authToken });
+    response.status(200).json({ success: true, message: "Login successful" });
   } catch (error) {
     // Log and respond with an internal server error for other errors
     console.error(error);
-    res.status(500).json({ success: false, error: "Internal Server Error" });
+    response
+      .status(500)
+      .json({ success: false, error: "Internal Server Error" });
   }
 });
 
 // Route for user logout
-router.post("/logout", (req, res) => {
+router.post("/logout", (request, response) => {
   try {
     // Clear the authentication cookies
-    setAuthCookies(res, "");
+    setAuthCookies(response, "");
 
     // Respond with a success message
-    res
+    response
       .status(200)
       .json({ success: true, message: "User logged out successfully" });
   } catch (error) {
     // Log and respond with an internal server error for other errors
     console.error(error);
-    res.status(500).json({ success: false, error: "Internal Server Error" });
+    response
+      .status(500)
+      .json({ success: false, error: "Internal Server Error" });
   }
 });
 

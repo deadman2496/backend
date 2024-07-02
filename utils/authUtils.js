@@ -30,9 +30,9 @@ export const generateAuthToken = (_id) => {
 };
 
 // Function to set authentication cookies in the response
-export const setAuthCookies = (res, value) => {
+export const setAuthCookies = (response, value) => {
   // Set the auth-token cookie with the provided value and options
-  res.cookie("auth-token", value, {
+  response.cookie("auth-token", value, {
     // Make the cookie accessible only by the web server
     httpOnly: true,
     // Use secure cookies in production
@@ -45,9 +45,9 @@ export const setAuthCookies = (res, value) => {
 };
 
 // Middleware to check if the user is authorized
-export const isUserAuthorized = async (req, res, next) => {
+export const isUserAuthorized = async (request, response, next) => {
   // Get the auth-token cookie from the request
-  const token = req.cookies["auth-token"];
+  const token = request.cookies["auth-token"];
 
   // If the token exists
   if (token) {
@@ -66,8 +66,8 @@ export const isUserAuthorized = async (req, res, next) => {
         // If the user is found
         if (user) {
           // Attach the user and token to the request object
-          req.user = user;
-          req.token = token;
+          request.user = user;
+          request.token = token;
           // Call the next middleware function
           return next();
         }
@@ -79,5 +79,5 @@ export const isUserAuthorized = async (req, res, next) => {
     }
   }
   // Respond with a 401 status and an error message if authorization fails
-  return res.status(401).json({ success: false, error: "Unauthorized" });
+  return response.status(401).json({ success: false, error: "Unauthorized" });
 };

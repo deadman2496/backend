@@ -16,8 +16,10 @@ import imageRoutes from "./routes/imageRoutes/imageRoutes.js";
 // Import the MongoDB connection URL from config file
 import { MONGO_URL } from "./config/config.js";
 
+// Import body-parser
 import bodyParser from "body-parser";
 
+// Import cors
 import cors from "cors";
 
 // Create an Express application
@@ -29,13 +31,15 @@ app.use(express.json());
 // Middleware to parse cookies in incoming requests
 app.use(cookieParser());
 
-app.use(cors());
-
-// *** Check later on to see if we need to define the frontend url here for proper functionality ***
-//   app.use(cors({
-//     origin: 'http://localhost:8081', // Adjust the client URL
-//     credentials: true, // Enable credentials (cookies)
-//   }));
+// Middleware to allow cross-origin requests
+app.use(
+  cors({
+    // Allow requests from this origin
+    origin: "http://localhost:8081",
+    // Allow cookies to be sent and received
+    credentials: true,
+  })
+);
 
 // Use user authentication routes for root path
 app.use("/", authRoutes);
@@ -43,12 +47,10 @@ app.use("/", authRoutes);
 // Use image routes for root path
 app.use("/", imageRoutes);
 
-
-// *** do we need this line for anything ***
-app.set("view engine", "ejs");
-
+// Middleware to parse URL-encoded bodies in incoming requests
 app.use(bodyParser.urlencoded({ extended: false }));
 
+// Middleware to parse JSON bodies in incoming requests
 app.use(bodyParser.json());
 
 // Define the server port number
@@ -69,10 +71,10 @@ mongoose
   });
 
 // Default server route
-// req = request, res = response
-app.get("/", (req, res) => {
+// request = request, response = response
+app.get("/", (request, response) => {
   // Send a JSON response indicating the server is running
-  res.send({ status: "Server is running" });
+  response.send({ status: "Server is running" });
 });
 
 // Start the server and listen on the defined port
