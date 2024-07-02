@@ -18,8 +18,7 @@ import { MONGO_URL } from "./config/config.js";
 
 import bodyParser from "body-parser";
 
-import fs from "fs";
-import path from "path";
+import cors from "cors";
 
 // Create an Express application
 const app = express();
@@ -30,12 +29,22 @@ app.use(express.json());
 // Middleware to parse cookies in incoming requests
 app.use(cookieParser());
 
+app.use(cors());
+
+// *** Check later on to see if we need to define the frontend url here for proper functionality ***
+//   app.use(cors({
+//     origin: 'http://localhost:8081', // Adjust the client URL
+//     credentials: true, // Enable credentials (cookies)
+//   }));
+
 // Use user authentication routes for root path
 app.use("/", authRoutes);
 
 // Use image routes for root path
 app.use("/", imageRoutes);
 
+
+// *** do we need this line for anything ***
 app.set("view engine", "ejs");
 
 app.use(bodyParser.urlencoded({ extended: false }));

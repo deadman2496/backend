@@ -107,7 +107,9 @@ router.post("/login", async (req, res) => {
     setAuthCookies(res, authToken);
 
     // Respond with a success message
-    res.status(200).json({ success: true, message: "Login successful" });
+    res
+      .status(200)
+      .json({ success: true, message: "Login successful", authToken });
   } catch (error) {
     // Log and respond with an internal server error for other errors
     console.error(error);

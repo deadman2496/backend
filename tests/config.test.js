@@ -2,6 +2,7 @@ import { test, expect } from "@playwright/test";
 import dotenv from "dotenv";
 import path from "path";
 import { fileURLToPath } from "url";
+// npx playwright test tests
 
 // Get __filename and __dirname equivalents in ES module
 const __filename = fileURLToPath(import.meta.url);
