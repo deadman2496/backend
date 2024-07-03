@@ -22,6 +22,12 @@ import bodyParser from "body-parser";
 // Import cors
 import cors from "cors";
 
+// Import dotenv
+import dotenv from "dotenv";
+
+// Load corsOrigin
+const corsOrigin = process.env.CORS_ORIGIN;
+
 // Create an Express application
 const app = express();
 
@@ -35,7 +41,7 @@ app.use(cookieParser());
 app.use(
   cors({
     // Allow requests from this origin
-    origin: "http://localhost:8081",
+    origin: corsOrigin,
     // Allow cookies to be sent and received
     credentials: true,
   })
