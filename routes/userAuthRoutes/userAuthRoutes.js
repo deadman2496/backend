@@ -111,9 +111,13 @@ router.post("/login", async (request, response) => {
 
     // Set the authentication cookies in the response
     setAuthCookies(response, authToken);
-
     // Respond with a success message
-    response.status(200).json({ success: true, message: "Login successful", token: authToken, user: {user} });
+    response.status(200).json({
+      success: true,
+      message: "Login successful",
+      token: authToken,
+      user: { user },
+    });
   } catch (error) {
     // Log and respond with an internal server error for other errors
     console.error(error);
