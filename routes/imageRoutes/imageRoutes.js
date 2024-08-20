@@ -38,16 +38,19 @@ router.post(
       }
       // Getting the userId from the authenticated user
       const userId = request.user._id;
-      const resizeImage = sharp(request.file.buffer)
+      let resizeImage = await sharp(request.file.buffer)
+        .jpeg({ mozjpeg: true, quality: 80 })
         .resize(320, 240)
         .toBuffer();
+
+      resizeImage = Buffer.from(resizeImage);
       // Create a new image document in the database
       const newImage = await ImageModel.create({
         userId: userId,
         name: request.body.name,
         imageFile: {
           data: resizeImage, //request.file.buffer, // Store file buffer directly
-          contentType: request.file.mimetype || "image/jpeg",
+          contentType: "image/jpeg", //request.file.mimetype || "image/jpeg",
         },
         price: request.body.price,
         description: request.body.description,
@@ -61,7 +64,7 @@ router.post(
     } catch (err) {
       // Handling errors and sending an error response
       console.error(err);
-      response.status(500).json({ success: false, error: err.message });
+      response.status(500).json({ success: false, error: err.message?.data });
     }
   }
 );
