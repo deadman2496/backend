@@ -69,6 +69,48 @@ router.post(
   }
 );
 
+// Route to get all images for the authenticated user
+router.get('/all_images', isUserAuthorized, async (request, response) => {
+  try {
+    // Getting the userId from the authenticated user
+    const userId = request.user._id;
+
+    // Finding all image documents for the user in the database
+    const images = await ImageModel.find({ userId: userId });
+
+    // If no images are found, send a 404 response
+    if (images.length === 0) {
+      return response
+        .status(404)
+        .json({ success: false, message: 'No images found' });
+    }
+
+    // Prepare the response data with base64 encoded images
+    const responseData = images.map(image => ({
+      _id: image._id,
+      name: image.name,
+      description: image.description,
+      price: image.price,
+      imageData: {
+        contentType: image.imageFile.contentType,
+        data: image.imageFile.data.toString('base64'), // Convert Buffer to base64 string
+      },
+      viewCount: image.viewCount, // Include the view count
+    }));
+
+    // Send the combined JSON response
+    response.status(200).json({ success: true, images: responseData });
+  } catch (error) {
+    // Logging the error to the console
+    console.error('Error fetching images:', error);
+    // Sending an internal server error response to the client
+    response
+      .status(500)
+      .json({ success: false, error: 'Internal Server Error' });
+  }
+});
+
+
 // GET route for fetching an image by ID
 router.get("/image/:id", isUserAuthorized, async (request, response) => {
   try {
