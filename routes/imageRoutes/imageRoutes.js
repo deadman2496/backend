@@ -69,14 +69,11 @@ router.post(
   }
 );
 
-// Route to get all images for the authenticated user
+// Route to get all images from the database
 router.get('/all_images', isUserAuthorized, async (request, response) => {
   try {
-    // Getting the userId from the authenticated user
-    const userId = request.user._id;
-
-    // Finding all image documents for the user in the database
-    const images = await ImageModel.find({ userId: userId });
+    // Finding all image documents in the database
+    const images = await ImageModel.find({});
 
     // If no images are found, send a 404 response
     if (images.length === 0) {
