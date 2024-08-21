@@ -73,7 +73,7 @@ router.post(
 router.get('/all_images', isUserAuthorized, async (request, response) => {
   try {
     // Finding all image documents in the database
-    const images = await ImageModel.find({});
+    const images = await ImageModel.find({}).populate('userId', 'name');
 
     // If no images are found, send a 404 response
     if (images.length === 0) {
@@ -82,12 +82,13 @@ router.get('/all_images', isUserAuthorized, async (request, response) => {
         .json({ success: false, message: 'No images found' });
     }
 
-    // Prepare the response data with base64 encoded images
+    // Prepare the response data with base64 encoded images and artist names
     const responseData = images.map(image => ({
       _id: image._id,
       name: image.name,
       description: image.description,
       price: image.price,
+      artistName: image.userId.name, // Include the artist's name
       imageData: {
         contentType: image.imageFile.contentType,
         data: image.imageFile.data.toString('base64'), // Convert Buffer to base64 string
