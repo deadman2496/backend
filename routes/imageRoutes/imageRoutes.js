@@ -72,7 +72,7 @@ router.post(
 // Route to get all images from the database
 router.get('/all_images', isUserAuthorized, async (request, response) => {
   try {
-    // Finding all image documents in the database
+    // Finding all image documents in the database and populating userId with the user's name
     const images = await ImageModel.find({}).populate('userId', 'name');
 
     // If no images are found, send a 404 response
@@ -88,7 +88,7 @@ router.get('/all_images', isUserAuthorized, async (request, response) => {
       name: image.name,
       description: image.description,
       price: image.price,
-      artistName: image.userId.name, // Include the artist's name
+      artistName: image.userId.name, // image.userId now contains the user document, and we access the name field
       imageData: {
         contentType: image.imageFile.contentType,
         data: image.imageFile.data.toString('base64'), // Convert Buffer to base64 string
