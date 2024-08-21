@@ -71,7 +71,7 @@ router.post(
 
 router.get('/all_images', isUserAuthorized, async (request, response) => {
   try {
-    // Finding all image documents in the database
+    // Find all image documents in the database
     const images = await ImageModel.find({});
 
     // If no images are found, send a 404 response
@@ -83,9 +83,10 @@ router.get('/all_images', isUserAuthorized, async (request, response) => {
 
     // Prepare the response data with base64 encoded images and artist names
     const responseData = await Promise.all(images.map(async (image) => {
-      // Find the user with _id matching image.userId
-      const user = await UserModel.findById(image.userId);
+      // Manually find the user document whose _id matches image.userId
+      const user = await UserModel.findOne({ _id: image.userId });
       
+      // Return the response object, including the artist name from the user document
       return {
         _id: image._id,
         name: image.name,
