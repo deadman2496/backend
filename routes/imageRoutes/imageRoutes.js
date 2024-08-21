@@ -69,11 +69,10 @@ router.post(
   }
 );
 
-// Route to get all images from the database
 router.get('/all_images', isUserAuthorized, async (request, response) => {
   try {
-    // Finding all image documents in the database and populating userId with the user's name
-    const images = await ImageModel.find({}).populate('userId', 'name');
+    // Finding all image documents in the database
+    const images = await ImageModel.find({});
 
     // If no images are found, send a 404 response
     if (images.length === 0) {
@@ -83,17 +82,22 @@ router.get('/all_images', isUserAuthorized, async (request, response) => {
     }
 
     // Prepare the response data with base64 encoded images and artist names
-    const responseData = images.map(image => ({
-      _id: image._id,
-      name: image.name,
-      description: image.description,
-      price: image.price,
-      artistName: image.userId.name, // image.userId now contains the user document, and we access the name field
-      imageData: {
-        contentType: image.imageFile.contentType,
-        data: image.imageFile.data.toString('base64'), // Convert Buffer to base64 string
-      },
-      viewCount: image.viewCount, // Include the view count
+    const responseData = await Promise.all(images.map(async (image) => {
+      // Find the user with _id matching image.userId
+      const user = await UserModel.findById(image.userId);
+      
+      return {
+        _id: image._id,
+        name: image.name,
+        description: image.description,
+        price: image.price,
+        artistName: user ? user.name : 'Unknown Artist', // Use the user's name or 'Unknown Artist' if not found
+        imageData: {
+          contentType: image.imageFile.contentType,
+          data: image.imageFile.data.toString('base64'), // Convert Buffer to base64 string
+        },
+        viewCount: image.viewCount, // Include the view count
+      };
     }));
 
     // Send the combined JSON response
