@@ -83,8 +83,6 @@ router.get('/all_images', isUserAuthorized, async (request, response) => {
 
     // Prepare the response data with base64 encoded images and artist names
     const responseData = await Promise.all(images.map(async (image) => {
-      // Manually find the user document whose _id matches image.userId
-      const user = await UserModel.findOne({ _id: image.userId });
       
       // Return the response object, including the artist name from the user document
       return {
@@ -92,7 +90,6 @@ router.get('/all_images', isUserAuthorized, async (request, response) => {
         name: image.name,
         description: image.description,
         price: image.price,
-        artistName: user ? user.name : 'Unknown Artist', // Use the user's name or 'Unknown Artist' if not found
         imageData: {
           contentType: image.imageFile.contentType,
           data: image.imageFile.data.toString('base64'), // Convert Buffer to base64 string
