@@ -39,8 +39,8 @@ router.post(
       // Getting the userId from the authenticated user
       const userId = request.user._id;
       let resizeImage = await sharp(request.file.buffer)
-        .jpeg({ mozjpeg: true, quality: 80 })
-        .resize(320, 240)
+        .jpeg({ mozjpeg: true, quality: 70 })
+        .resize(160, 120)
         .toBuffer();
 
       resizeImage = Buffer.from(resizeImage);
