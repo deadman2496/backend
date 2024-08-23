@@ -69,9 +69,10 @@ router.post(
   }
 );
 
+// Route to get all images from the database
 router.get('/all_images', isUserAuthorized, async (request, response) => {
   try {
-    // Find all image documents in the database
+    // Finding all image documents in the database
     const images = await ImageModel.find({});
 
     // If no images are found, send a 404 response
@@ -81,21 +82,17 @@ router.get('/all_images', isUserAuthorized, async (request, response) => {
         .json({ success: false, message: 'No images found' });
     }
 
-    // Prepare the response data with base64 encoded images and artist names
-    const responseData = await Promise.all(images.map(async (image) => {
-      
-      // Return the response object, including the artist name from the user document
-      return {
-        _id: image._id,
-        name: image.name,
-        description: image.description,
-        price: image.price,
-        imageData: {
-          contentType: image.imageFile.contentType,
-          data: image.imageFile.data.toString('base64'), // Convert Buffer to base64 string
-        },
-        viewCount: image.viewCount, // Include the view count
-      };
+    // Prepare the response data with base64 encoded images
+    const responseData = images.map(image => ({
+      _id: image._id,
+      name: image.name,
+      description: image.description,
+      price: image.price,
+      imageData: {
+        contentType: image.imageFile.contentType,
+        data: image.imageFile.data.toString('base64'), // Convert Buffer to base64 string
+      },
+      viewCount: image.viewCount, // Include the view count
     }));
 
     // Send the combined JSON response
