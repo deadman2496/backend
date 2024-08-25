@@ -47,6 +47,7 @@ router.post(
       // Create a new image document in the database
       const newImage = await ImageModel.create({
         userId: userId,
+        artistName: request.body.artistName,
         name: request.body.name,
         imageFile: {
           data: resizeImage, //request.file.buffer, // Store file buffer directly
@@ -85,6 +86,7 @@ router.get('/all_images', isUserAuthorized, async (request, response) => {
     // Prepare the response data with base64 encoded images
     const responseData = images.map(image => ({
       _id: image._id,
+      artistName: image.artistName,
       name: image.name,
       description: image.description,
       price: image.price,
@@ -129,6 +131,7 @@ router.get("/image/:id", isUserAuthorized, async (request, response) => {
     // Prepare the response object
     const responseData = {
       _id: image._id,
+      artistName: image.artistName,
       name: image.name,
       description: image.description,
       price: image.price,

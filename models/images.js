@@ -13,6 +13,10 @@ const ImageSchema = new Schema(
       // userId is required with a custom error message
       required: [true, "UserId is required"],
     },
+    artistName: {
+      type: String,
+      required: [true, "artistName is required"],
+    },
     // Define the name field with type String and validation
     name: {
       type: String,
