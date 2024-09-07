@@ -19,6 +19,7 @@ router.post(
   upload.single("image"),
   isUserAuthorized,
   async (request, response) => {
+    console.log(request)
     try {
       // Getting the userId from the authenticated user
       const userId = request.user._id;
