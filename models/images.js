@@ -28,9 +28,8 @@ const ImageSchema = new Schema(
       maxLength: [30, "Name should be less than 30 characters"],
     },
     // Define the imageFile field with type String, uniqueness, and validation
-    imageFile: {
-      data: Buffer,
-      contentType: String,
+    imageLink: {
+      type: String,
     },
     // Define the price field with type String and validation
     price: {

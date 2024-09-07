@@ -4,9 +4,6 @@ import express from "express";
 // Importing the mongoose module
 import mongoose from "mongoose";
 
-// Importing the multer module
-import multer from "multer";
-
 // Importing the ImageModel from the models directory
 import ImageModel from "../../models/images.js";
 
@@ -16,15 +13,6 @@ import { isUserAuthorized } from "../../utils/authUtils.js";
 // Create a router instance with the router configuration
 const router = express.Router();
 
-// Store files in memory as Buffer objects
-const storage = multer.memoryStorage();
-
-// Create a multer instance with the storage configuration
-const upload = multer({ storage: storage });
-
-// Calls Sharp package for resizing buffer
-import sharp from "sharp";
-
 // POST route for uploading an image
 router.post(
   "/image",
@@ -32,27 +20,15 @@ router.post(
   isUserAuthorized,
   async (request, response) => {
     try {
-      // Check the file size of the user submitted image is not greater than 4.5mb
-      if (request.file.size >= 4.5e6) {
-        throw new Error("File is too large!");
-      }
       // Getting the userId from the authenticated user
       const userId = request.user._id;
-      let resizeImage = await sharp(request.file.buffer)
-        .jpeg({ mozjpeg: true, quality: 50 })
-        .resize(160, 120)
-        .toBuffer();
 
-      resizeImage = Buffer.from(resizeImage);
       // Create a new image document in the database
       const newImage = await ImageModel.create({
         userId: userId,
         artistName: request.body.artistName,
         name: request.body.name,
-        imageFile: {
-          data: resizeImage, //request.file.buffer, // Store file buffer directly
-          contentType: "image/jpeg", //request.file.mimetype || "image/jpeg",
-        },
+        imageLink: request.body.secure_url,
         price: request.body.price,
         description: request.body.description,
       });
@@ -90,10 +66,7 @@ router.get('/all_images', isUserAuthorized, async (request, response) => {
       name: image.name,
       description: image.description,
       price: image.price,
-      imageData: {
-        contentType: image.imageFile.contentType,
-        data: image.imageFile.data.toString('base64'), // Convert Buffer to base64 string
-      },
+      imageLink: image.imageLink,
       viewCount: image.viewCount, // Include the view count
     }));
 
@@ -135,10 +108,7 @@ router.get("/image/:id", isUserAuthorized, async (request, response) => {
       name: image.name,
       description: image.description,
       price: image.price,
-      imageData: {
-        contentType: image.imageFile.contentType,
-        data: image.imageFile.data.toString("base64"), // Convert Buffer to base64 string
-      },
+      imageLink: image.imageLink,
     };
 
     // Send the combined JSON response
