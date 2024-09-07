@@ -25,36 +25,39 @@ const upload = multer({ storage: storage });
 // POST route for uploading an image
 router.post(
   "/image",
-  upload.single("image"),
   isUserAuthorized,
   async (request, response) => {
-    console.log(request)
     try {
       // Getting the userId from the authenticated user
       const userId = request.user._id;
+
+      // Log the request body to verify the data
+      console.log("Request Body:", request.body);
 
       // Create a new image document in the database
       const newImage = await ImageModel.create({
         userId: userId,
         artistName: request.body.artistName,
         name: request.body.name,
-        imageLink: request.body.secure_url,
+        imageLink: request.body.imageLink,  // Make sure this matches the Cloudinary secure_url
         price: request.body.price,
         description: request.body.description,
       });
-      console.log(newImage);
+
+      console.log("New Image Saved:", newImage);
 
       // Sending a success response after image upload
       response
         .status(200)
-        .json({ success: true, message: "Image uploaded successfully" });
+        .json({ success: true, message: "Image uploaded and saved successfully" });
     } catch (err) {
       // Handling errors and sending an error response
-      console.error(err);
-      response.status(500).json({ success: false, error: err.message?.data });
+      console.error("Error Saving Image:", err);
+      response.status(500).json({ success: false, error: err.message });
     }
   }
 );
+
 
 // Route to get all images from the database
 router.get('/all_images', isUserAuthorized, async (request, response) => {
