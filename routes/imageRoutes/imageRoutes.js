@@ -4,6 +4,9 @@ import express from "express";
 // Importing the mongoose module
 import mongoose from "mongoose";
 
+// Importing the multer module
+import multer from "multer";
+
 // Importing the ImageModel from the models directory
 import ImageModel from "../../models/images.js";
 
@@ -13,39 +16,45 @@ import { isUserAuthorized } from "../../utils/authUtils.js";
 // Create a router instance with the router configuration
 const router = express.Router();
 
+// Store files in memory as Buffer objects
+const storage = multer.memoryStorage();
+
+// Create a multer instance with the storage configuration
+const upload = multer({ storage: storage });
+
 // POST route for uploading an image
-// router.post(
-//   "/image",
-//   upload.single("image"),
-//   isUserAuthorized,
-//   async (request, response) => {
-//     console.log(request)
-//     try {
-//       // Getting the userId from the authenticated user
-//       const userId = request.user._id;
+router.post(
+  "/image",
+  upload.single("image"),
+  isUserAuthorized,
+  async (request, response) => {
+    console.log(request)
+    try {
+      // Getting the userId from the authenticated user
+      const userId = request.user._id;
 
-//       // Create a new image document in the database
-//       const newImage = await ImageModel.create({
-//         userId: userId,
-//         artistName: request.body.artistName,
-//         name: request.body.name,
-//         imageLink: request.body.secure_url,
-//         price: request.body.price,
-//         description: request.body.description,
-//       });
-//       console.log(newImage);
+      // Create a new image document in the database
+      const newImage = await ImageModel.create({
+        userId: userId,
+        artistName: request.body.artistName,
+        name: request.body.name,
+        imageLink: request.body.secure_url,
+        price: request.body.price,
+        description: request.body.description,
+      });
+      console.log(newImage);
 
-//       // Sending a success response after image upload
-//       response
-//         .status(200)
-//         .json({ success: true, message: "Image uploaded successfully" });
-//     } catch (err) {
-//       // Handling errors and sending an error response
-//       console.error(err);
-//       response.status(500).json({ success: false, error: err.message?.data });
-//     }
-//   }
-// );
+      // Sending a success response after image upload
+      response
+        .status(200)
+        .json({ success: true, message: "Image uploaded successfully" });
+    } catch (err) {
+      // Handling errors and sending an error response
+      console.error(err);
+      response.status(500).json({ success: false, error: err.message?.data });
+    }
+  }
+);
 
 // Route to get all images from the database
 router.get('/all_images', isUserAuthorized, async (request, response) => {
