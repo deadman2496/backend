@@ -25,7 +25,7 @@ const upload = multer({ storage: storage });
 // POST route for uploading an image
 router.post(
   "/image",
-  //isUserAuthorized, //commented out for testing
+  isUserAuthorized,
   async (request, response) => {
     try {
       // Getting the userId from the authenticated user
@@ -36,7 +36,7 @@ router.post(
 
       // Create a new image document in the database
       const newImage = await ImageModel.create({
-        //userId: userId, //commented out for testing
+        userId: userId,
         artistName: request.body.artistName,
         name: request.body.name,
         imageLink: request.body.imageLink,  // Make sure this matches the Cloudinary secure_url

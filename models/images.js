@@ -8,11 +8,11 @@ const { Schema } = mongoose;
 const ImageSchema = new Schema(
   {
     // Define the userId field with type String and validation
-    // userId: { //commented out for testing
-    //   type: String,
-    //   // userId is required with a custom error message
-    //   required: [true, "UserId is required"],
-    // },
+    userId: { //commented out for testing
+      type: String,
+      // userId is required with a custom error message
+      required: [true, "UserId is required"],
+    },
     artistName: {
       type: String,
       required: [true, "artistName is required"],
