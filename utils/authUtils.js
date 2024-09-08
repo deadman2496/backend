@@ -46,6 +46,7 @@ export const setAuthCookies = (response, value) => {
 
 // Middleware to check if the user is authorized
 export const isUserAuthorized = async (request, response, next) => {
+  console.log("whole request: ", request)
   // Get the auth-token cookie from the request
   const token = request.cookies["auth-token"];
   console.log("users token before it checks: ", token)
