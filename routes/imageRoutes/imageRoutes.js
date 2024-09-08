@@ -269,7 +269,7 @@ router.get("/images", isUserAuthorized, async (request, response) => {
   }
 });
 
-// Route to update the view count of an image by id
+// Route to update the view count of an image by id 
 router.patch("/viewcount/:id/", isUserAuthorized, async (request, response) => {
   try {
     // Getting the userId from the authenticated user
