@@ -25,7 +25,7 @@ const upload = multer({ storage: storage });
 // POST route for uploading an image
 router.post(
   "/image",
-  isUserAuthorized,
+  //isUserAuthorized,
   async (request, response) => {
     try {
       console.log("Whole request: ", request)
