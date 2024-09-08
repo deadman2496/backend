@@ -28,6 +28,7 @@ router.post(
   isUserAuthorized,
   async (request, response) => {
     try {
+      console.log("Whole request: ", request)
       // Getting the userId from the authenticated user
       const userId = request.user._id;
 
