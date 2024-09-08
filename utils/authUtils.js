@@ -48,12 +48,13 @@ export const setAuthCookies = (response, value) => {
 export const isUserAuthorized = async (request, response, next) => {
   // Get the auth-token cookie from the request
   const token = request.cookies["auth-token"];
-
+  console.log("users token before it checks: ", token)
   // If the token exists
   if (token) {
     try {
       // Verify the token using the JWT_SECRET
       const data = jwt.verify(token, JWT_SECRET);
+      console.log("data during verification: ", data)
       // If the data is not a string
       if (typeof data !== "string") {
         // Find the user by ID from the token data
