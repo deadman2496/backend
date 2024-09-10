@@ -30,11 +30,9 @@ router.post(
     try {
       console.log("Whole request: ", request)
       // Getting the userId from the authenticated user
-      const userId = request.user._id;
-
+      const userId = request.body.user._id;
       // Log the request body to verify the data
       console.log("Request Body:", request.body);
-
       // Create a new image document in the database
       const newImage = await ImageModel.create({
         userId: userId,
@@ -44,9 +42,7 @@ router.post(
         price: request.body.price,
         description: request.body.description,
       });
-
       console.log("New Image Saved:", newImage);
-
       // Sending a success response after image upload
       response
         .status(200)
