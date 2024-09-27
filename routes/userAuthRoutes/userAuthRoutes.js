@@ -22,35 +22,26 @@ const router = express.Router();
 // Route for user signup
 router.post("/signup", async (request, response) => {
   try {
-    // Destructure name, email, and password from the request body
-    // TODO: we confirm email setup here so we pass email 2 times and they match
     const { name, email, password } = request.body;
 
-    // Check if a user with the given email already exists
     const userExists = await UserModel.findOne({ email });
 
-    // If the user exists, return a 409 conflict status
     if (userExists) {
       return response
         .status(409)
         .json({ success: false, error: "User already exists" });
     }
 
-    // Create a new user with the provided details
     const newUser = await UserModel.create({
       name,
       email,
       password,
     });
 
-    // Log a message indicating successful user creation
     console.log("New user created successfully");
 
-    // Respond with a success message
     response.status(200).json({ success: true, message: "Signup successful" });
   } catch (error) {
-    console.log("ERROR");
-    // Handle Mongoose validation errors
     if (error instanceof mongoose.Error.ValidationError) {
       for (let field in error.errors) {
         const message = error.errors[field].message;
@@ -58,7 +49,6 @@ router.post("/signup", async (request, response) => {
       }
     }
 
-    // Log and respond with an internal server error for other errors
     console.error(error);
     response
       .status(500)
@@ -69,49 +59,34 @@ router.post("/signup", async (request, response) => {
 // Route for user login
 router.post("/login", async (request, response) => {
   try {
-    // Destructure email and password from the request body
     const { email, password } = request.body;
 
-    // Check if email is provided
-    if (!email) {
+    if (!email || !password) {
       return response
         .status(400)
-        .json({ success: false, error: "Email is required" });
+        .json({ success: false, error: "Email and password are required" });
     }
 
-    // Check if password is provided
-    if (!password) {
-      return response
-        .status(400)
-        .json({ success: false, error: "Password is required" });
-    }
-
-    // Find the user by email and select the password field
     const user = await UserModel.findOne({ email }).select("+password");
 
-    // If the user is not found, return a 404 not found status
     if (!user) {
       return response
         .status(404)
         .json({ success: false, error: "User not found" });
     }
 
-    // Compare the provided password with the stored hashed password
     const isPasswordCorrect = await compare(password, user.password);
 
-    // If the password is incorrect, return a 401 unauthorized status
     if (!isPasswordCorrect) {
       return response
         .status(401)
         .json({ success: false, error: "Incorrect password" });
     }
 
-    // Generate an authentication token for the user
     const authToken = generateAuthToken(user._id);
 
-    // Set the authentication cookies in the response
     setAuthCookies(response, authToken);
-    // Respond with a success message
+
     response.status(200).json({
       success: true,
       message: "Login successful",
@@ -119,7 +94,6 @@ router.post("/login", async (request, response) => {
       user: { user },
     });
   } catch (error) {
-    // Log and respond with an internal server error for other errors
     console.error(error);
     response
       .status(500)
@@ -130,19 +104,50 @@ router.post("/login", async (request, response) => {
 // Route for user logout
 router.post("/logout", (request, response) => {
   try {
-    // Clear the authentication cookies
     setAuthCookies(response, "");
 
-    // Respond with a success message
     response
       .status(200)
       .json({ success: true, message: "User logged out successfully" });
   } catch (error) {
-    // Log and respond with an internal server error for other errors
     console.error(error);
     response
       .status(500)
       .json({ success: false, error: "Internal Server Error" });
+  }
+});
+
+// Route for adding/updating profile picture
+router.post("/profile-picture", async (request, response) => {
+  try {
+    const { userId, profilePictureLink } = request.body;
+
+    if (!userId || !profilePictureLink) {
+      return response
+        .status(400)
+        .json({ success: false, error: "User ID and profile picture link are required" });
+    }
+
+    const user = await UserModel.findById(userId);
+
+    if (!user) {
+      return response
+        .status(404)
+        .json({ success: false, error: "User not found" });
+    }
+
+    // Update the user's profile picture link
+    user.profilePictureLink = profilePictureLink;
+    await user.save();
+
+    response.status(200).json({
+      success: true,
+      message: "Profile picture updated successfully",
+      user,
+    });
+  } catch (error) {
+    console.error(error);
+    response.status(500).json({ success: false, error: "Internal Server Error" });
   }
 });
 

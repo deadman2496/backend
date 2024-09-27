@@ -16,38 +16,33 @@ const UserSchema = new Schema(
     // Define the email field with type String, uniqueness, and validation
     email: {
       type: String,
-      // Email must be unique
       unique: true,
-      // Email is required with a custom error message
       required: [true, "Email is required"],
       match: [
-        // Regular expression for email validation
         /^\w+(\.\w+)*@\w+([\-]?\w+)*(\.\w{2,3})+$/,
-        // Custom error message for invalid email format
         "Invalid email address",
       ],
     },
     // Define the name field with type String and validation
     name: {
       type: String,
-      // Name is required with a custom error message
       required: [true, "Name is required"],
-      // Minimum length of 4 characters with a custom error message
       minLength: [4, "Name should be at least 4 characters"],
-      // Maximum length of 30 characters with a custom error message
       maxLength: [30, "Name should be less than 30 characters"],
     },
     // Define the password field with type String and validation
     password: {
       type: String,
-      // Password is required with a custom error message
       required: [true, "Password is required"],
-      // Password field will not be selected by default in queries
       select: false,
-      // Minimum length of 6 characters with a custom error message
       minLength: [6, "Password should be at least 6 characters"],
-      // Maximum length of 30 characters with a custom error message
       maxLength: [30, "Password should be less than 30 characters"],
+    },
+    // Add a field for profile picture link
+    profilePictureLink: {
+      type: String,
+      // Optional field, can be null if the user doesn't have a profile picture
+      default: null,
     },
   },
   {
