@@ -220,6 +220,46 @@ router.put("/profile-picture", async (request, response) => {
   }
 });
 
+// Route for deleting profile picture
+router.delete("/profile-picture/:userId", async (request, response) => {
+  try {
+    const { userId } = request.params;
+
+    // Find the user by their userId
+    const user = await UserModel.findById(userId);
+
+    if (!user) {
+      return response.status(404).json({
+        success: false,
+        error: "User not found",
+      });
+    }
+
+    // Check if the user has a profile picture link
+    if (!user.profilePictureLink) {
+      return response.status(400).json({
+        success: false,
+        error: "No profile picture to delete",
+      });
+    }
+
+    // Remove the user's profile picture by setting the link to null
+    user.profilePictureLink = null;
+    await user.save();
+
+    response.status(200).json({
+      success: true,
+      message: "Profile picture deleted successfully",
+    });
+  } catch (error) {
+    console.error(error);
+    response.status(500).json({
+      success: false,
+      error: "Internal Server Error",
+    });
+  }
+});
+
 
 // Export the router
 export default router;
