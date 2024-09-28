@@ -179,6 +179,47 @@ router.get("/profile-picture/:userId", async (request, response) => {
   }
 });
 
+// Route for updating profile picture
+router.put("/profile-picture", async (request, response) => {
+  try {
+    const { userId, profilePictureLink } = request.body;
+
+    // Check if userId and profilePictureLink are provided
+    if (!userId || !profilePictureLink) {
+      return response.status(400).json({
+        success: false,
+        error: "User ID and profile picture link are required",
+      });
+    }
+
+    // Find the user by userId
+    const user = await UserModel.findById(userId);
+
+    if (!user) {
+      return response.status(404).json({
+        success: false,
+        error: "User not found",
+      });
+    }
+
+    // Update the user's profile picture link
+    user.profilePictureLink = profilePictureLink;
+    await user.save();
+
+    response.status(200).json({
+      success: true,
+      message: "Profile picture updated successfully",
+      user,
+    });
+  } catch (error) {
+    console.error(error);
+    response.status(500).json({
+      success: false,
+      error: "Internal Server Error",
+    });
+  }
+});
+
 
 // Export the router
 export default router;
