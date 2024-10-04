@@ -16,6 +16,19 @@ import UserModel from "../../models/users.js";
 // Import utility functions for authentication
 import { setAuthCookies, generateAuthToken } from "../../utils/authUtils.js";
 
+// Import dotenv
+import dotenv from "dotenv";
+// Load environment variables from the .env file
+dotenv.config();
+
+const cloudinary = require('cloudinary').v2;
+
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD,
+  api_key: process.env.CLOUDINARY_API,
+  api_secret: process.env.CLOUDINARY_SECRET
+});
+
 // Create a new Express router
 const router = express.Router();
 
@@ -221,42 +234,14 @@ router.put("/profile-picture", async (request, response) => {
 });
 
 // Route for deleting profile picture
-router.delete("/profile-picture/:userId", async (request, response) => {
+router.post('/delete-profile-picture', async (req, res) => {
+  const { public_id } = req.body;
+
   try {
-    const { userId } = request.params;
-
-    // Find the user by their userId
-    const user = await UserModel.findById(userId);
-
-    if (!user) {
-      return response.status(404).json({
-        success: false,
-        error: "User not found",
-      });
-    }
-
-    // Check if the user has a profile picture link
-    if (!user.profilePictureLink) {
-      return response.status(400).json({
-        success: false,
-        error: "No profile picture to delete",
-      });
-    }
-
-    // Remove the user's profile picture by setting the link to null
-    user.profilePictureLink = null;
-    await user.save();
-
-    response.status(200).json({
-      success: true,
-      message: "Profile picture deleted successfully",
-    });
+    const result = await cloudinary.uploader.destroy(public_id);
+    res.json({ success: true, result });
   } catch (error) {
-    console.error(error);
-    response.status(500).json({
-      success: false,
-      error: "Internal Server Error",
-    });
+    res.status(500).json({ success: false, message: 'Failed to delete image', error });
   }
 });
 
