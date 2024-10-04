@@ -21,9 +21,9 @@ import dotenv from "dotenv";
 // Load environment variables from the .env file
 dotenv.config();
 
-const cloudinary = require('cloudinary').v2;
+import cloudinary from 'cloudinary';
 
-cloudinary.config({
+cloudinary.v2.config({
   cloud_name: process.env.CLOUDINARY_CLOUD,
   api_key: process.env.CLOUDINARY_API,
   api_secret: process.env.CLOUDINARY_SECRET
