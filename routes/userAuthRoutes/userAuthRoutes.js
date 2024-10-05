@@ -240,6 +240,7 @@ router.post('/delete-profile-picture', async (req, res) => {
 
   try {
     const result = await cloudinary.uploader.destroy(public_id);
+    console.log(`RESULT ${result}`)
     res.json({ success: true, result });
   } catch (error) {
     res.status(500).json({ success: false, message: 'Failed to delete image', error });
