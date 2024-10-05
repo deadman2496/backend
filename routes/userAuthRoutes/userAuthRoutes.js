@@ -240,7 +240,7 @@ router.post('/delete-profile-picture', async (req, res) => {
 
   try {
     cloudinary.v2.api
-      .delete_resources([public_id],
+      .delete_resources(public_id,
       { type: 'upload', resource_type: 'image'})
       .then(console.log);
     // const result = await cloudinary.uploader.destroy(public_id);
