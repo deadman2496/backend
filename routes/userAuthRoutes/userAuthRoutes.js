@@ -236,6 +236,7 @@ router.put("/profile-picture", async (request, response) => {
 // Route for deleting profile picture
 router.post('/delete-profile-picture', async (req, res) => {
   const { public_id } = req.body;
+  console.log(`DELETING ${public_id}`)
 
   try {
     const result = await cloudinary.uploader.destroy(public_id);
