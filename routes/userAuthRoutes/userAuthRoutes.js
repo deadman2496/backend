@@ -130,6 +130,31 @@ router.post("/logout", (request, response) => {
   }
 });
 
+// Route to get all users' profile pictures
+router.get("/all-profile-pictures", async (request, response) => {
+  try {
+    // Find all users and select only the profilePictureLink field along with the user's name or email for identification
+    const users = await UserModel.find({}, { name: 1, email: 1, profilePictureLink: 1 });
+
+    // Check if any users exist in the database
+    if (!users || users.length === 0) {
+      return response.status(404).json({ success: false, error: "No users found" });
+    }
+
+    // Filter out users who do not have a profile picture link (optional)
+    const usersWithProfilePictures = users.filter(user => user.profilePictureLink);
+
+    // Respond with the list of users and their profile picture links
+    response.status(200).json({
+      success: true,
+      profilePictures: usersWithProfilePictures,
+    });
+  } catch (error) {
+    console.error(error);
+    response.status(500).json({ success: false, error: "Internal Server Error" });
+  }
+});
+
 // Route for adding/updating profile picture
 router.post("/profile-picture", async (request, response) => {
   try {
