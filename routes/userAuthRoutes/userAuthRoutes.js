@@ -130,11 +130,14 @@ router.post("/logout", (request, response) => {
   }
 });
 
-// Route to get all users' profile pictures
+// Route to get all users' profile pictures, bio, and artist type
 router.get("/all-profile-pictures", async (request, response) => {
   try {
-    // Find all users and select only the profilePictureLink field along with the user's name or email for identification
-    const users = await UserModel.find({}, { name: 1, email: 1, profilePictureLink: 1 });
+    // Find all users and select the necessary fields: name, email, profilePictureLink, bio, and artistType
+    const users = await UserModel.find(
+      {},
+      { name: 1, email: 1, profilePictureLink: 1, bio: 1, artistType: 1 }
+    );
 
     // Check if any users exist in the database
     if (!users || users.length === 0) {
@@ -144,10 +147,10 @@ router.get("/all-profile-pictures", async (request, response) => {
     // Filter out users who do not have a profile picture link (optional)
     const usersWithProfilePictures = users.filter(user => user.profilePictureLink);
 
-    // Respond with the list of users and their profile picture links
+    // Respond with the list of users and their profile picture links, bio, and artist type
     response.status(200).json({
       success: true,
-      profilePictures: usersWithProfilePictures,
+      users: usersWithProfilePictures,
     });
   } catch (error) {
     console.error(error);
@@ -275,6 +278,89 @@ router.post('/delete-profile-picture', async (req, res) => {
     res.status(500).json({ success: false, message: 'Failed to delete image', error });
   }
 });
+
+// Endpoint to set or update the user's bio
+router.put("/set-bio", async (request, response) => {
+  try {
+    const { userId, bio } = request.body;
+
+    // Check if userId and bio are provided
+    if (!userId || !bio) {
+      return response.status(400).json({
+        success: false,
+        error: "User ID and bio are required",
+      });
+    }
+
+    // Find the user by userId
+    const user = await UserModel.findById(userId);
+
+    if (!user) {
+      return response.status(404).json({
+        success: false,
+        error: "User not found",
+      });
+    }
+
+    // Update the user's bio
+    user.bio = bio;
+    await user.save();
+
+    response.status(200).json({
+      success: true,
+      message: "Bio updated successfully",
+      user,
+    });
+  } catch (error) {
+    console.error(error);
+    response.status(500).json({
+      success: false,
+      error: "Internal Server Error",
+    });
+  }
+});
+
+// Endpoint to set or update the user's artist type
+router.put("/set-artist-type", async (request, response) => {
+  try {
+    const { userId, artistType } = request.body;
+
+    // Check if userId and artistType are provided
+    if (!userId || !artistType) {
+      return response.status(400).json({
+        success: false,
+        error: "User ID and artist type are required",
+      });
+    }
+
+    // Find the user by userId
+    const user = await UserModel.findById(userId);
+
+    if (!user) {
+      return response.status(404).json({
+        success: false,
+        error: "User not found",
+      });
+    }
+
+    // Update the user's artist type
+    user.artistType = artistType;
+    await user.save();
+
+    response.status(200).json({
+      success: true,
+      message: "Artist type updated successfully",
+      user,
+    });
+  } catch (error) {
+    console.error(error);
+    response.status(500).json({
+      success: false,
+      error: "Internal Server Error",
+    });
+  }
+});
+
 
 
 // Export the router

@@ -44,6 +44,18 @@ const UserSchema = new Schema(
       // Optional field, can be null if the user doesn't have a profile picture
       default: null,
     },
+    // Add the bio field with type String and a maximum length
+    bio: {
+      type: String,
+      maxLength: [500, "Bio should be less than 500 characters"],
+      default: null,
+    },
+    // Add the artistType field with type String to specify the type of artist
+    artistType: {
+      type: String,
+      maxLength: [50, "Artist type should be less than 50 characters"],
+      default: null,
+    },
   },
   {
     // Add timestamps for createdAt and updatedAt
@@ -53,7 +65,7 @@ const UserSchema = new Schema(
 );
 
 // Middleware to hash the password before saving if it's modified
-UserSchema.pre("save", async function(next) {
+UserSchema.pre("save", async function (next) {
   if (!this.isModified("password")) {
     return next();
   }
