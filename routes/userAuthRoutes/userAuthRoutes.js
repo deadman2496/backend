@@ -16,6 +16,8 @@ import UserModel from "../../models/users.js";
 // Import utility functions for authentication
 import { setAuthCookies, generateAuthToken } from "../../utils/authUtils.js";
 
+import { isUserAuthorized } from "../../utils/authUtils.js";
+
 // Import dotenv
 import dotenv from "dotenv";
 // Load environment variables from the .env file
@@ -280,20 +282,25 @@ router.post('/delete-profile-picture', async (req, res) => {
 });
 
 // Endpoint to set or update the user's bio
-router.put("/set-bio", async (request, response) => {
+router.put("/set-bio", isUserAuthorized, async (request, response) => {
   try {
-    const { userId, bio } = request.body;
+    const { bio } = request.body;
+    const userId = request.user._id; // Retrieve the authenticated user's ID
 
-    // Check if userId and bio are provided
-    if (!userId || !bio) {
+    // Check if the bio is provided
+    if (!bio) {
       return response.status(400).json({
         success: false,
-        error: "User ID and bio are required",
+        error: "Bio is required",
       });
     }
 
-    // Find the user by userId
-    const user = await UserModel.findById(userId);
+    // Find the user by userId and update the bio
+    const user = await UserModel.findByIdAndUpdate(
+      userId,
+      { bio },
+      { new: true }
+    );
 
     if (!user) {
       return response.status(404).json({
@@ -302,23 +309,20 @@ router.put("/set-bio", async (request, response) => {
       });
     }
 
-    // Update the user's bio
-    user.bio = bio;
-    await user.save();
-
     response.status(200).json({
       success: true,
       message: "Bio updated successfully",
-      user,
+      bio: user.bio,
     });
   } catch (error) {
-    console.error(error);
+    console.error("Error updating bio:", error);
     response.status(500).json({
       success: false,
       error: "Internal Server Error",
     });
   }
 });
+
 
 // Endpoint to set or update the user's artist type
 router.put("/set-artist-type", async (request, response) => {
