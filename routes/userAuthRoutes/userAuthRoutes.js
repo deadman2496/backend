@@ -323,6 +323,33 @@ router.put("/set-bio", isUserAuthorized, async (request, response) => {
   }
 });
 
+// Endpoint to get the user's bio
+router.get("/get-bio", isUserAuthorized, async (request, response) => {
+  try {
+    const userId = request.user._id; // Retrieve the authenticated user's ID
+
+    // Find the user by userId
+    const user = await UserModel.findById(userId);
+
+    if (!user) {
+      return response.status(404).json({
+        success: false,
+        error: "User not found",
+      });
+    }
+
+    response.status(200).json({
+      success: true,
+      bio: user.bio || 'No bio available',
+    });
+  } catch (error) {
+    console.error("Error fetching bio:", error);
+    response.status(500).json({
+      success: false,
+      error: "Internal Server Error",
+    });
+  }
+});
 
 // Endpoint to set or update the user's artist type
 router.put("/set-artist-type", async (request, response) => {
