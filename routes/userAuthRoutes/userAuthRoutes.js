@@ -282,10 +282,13 @@ router.post('/delete-profile-picture', async (req, res) => {
 });
 
 // Endpoint to set or update the user's bio
-router.put("/set-bio", isUserAuthorized, async (request, response) => {
+router.post("/set-bio", isUserAuthorized, async (request, response) => {
   try {
     const { bio } = request.body;
     const userId = request.user._id; // Retrieve the authenticated user's ID
+
+    console.log("Bio received:", bio); // Log the bio to verify data
+    console.log("User ID from token:", userId); // Log the userId to ensure it's retrieved properly
 
     // Check if the bio is provided
     if (!bio) {
