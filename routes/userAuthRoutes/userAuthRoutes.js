@@ -352,15 +352,16 @@ router.get("/get-bio", isUserAuthorized, async (request, response) => {
 });
 
 // Endpoint to set or update the user's artist type
-router.put("/set-artist-type", async (request, response) => {
+router.put("/set-artist-type", isUserAuthorized, async (request, response) => {
   try {
-    const { userId, artistType } = request.body;
+    const { artistType } = request.body;
+    const userId = request.user._id; // Retrieve the authenticated user's ID
 
-    // Check if userId and artistType are provided
-    if (!userId || !artistType) {
+    // Check if the artistType is provided
+    if (!artistType) {
       return response.status(400).json({
         success: false,
-        error: "User ID and artist type are required",
+        error: "Artist type is required",
       });
     }
 
@@ -381,18 +382,16 @@ router.put("/set-artist-type", async (request, response) => {
     response.status(200).json({
       success: true,
       message: "Artist type updated successfully",
-      user,
+      artistType: user.artistType,
     });
   } catch (error) {
-    console.error(error);
+    console.error("Error updating artist type:", error);
     response.status(500).json({
       success: false,
       error: "Internal Server Error",
     });
   }
 });
-
-
 
 // Export the router
 export default router;
