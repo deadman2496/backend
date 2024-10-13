@@ -132,6 +132,37 @@ router.post("/logout", (request, response) => {
   }
 });
 
+// Endpoint to get the user's profile
+router.get("/get-profile", isUserAuthorized, async (request, response) => {
+  try {
+    const userId = request.user._id; // Get the authenticated user's ID
+
+    // Find the user by their ID, select the necessary fields
+    const user = await UserModel.findById(userId, { name: 1, email: 1 });
+
+    if (!user) {
+      return response.status(404).json({
+        success: false,
+        error: "User not found",
+      });
+    }
+
+    response.status(200).json({
+      success: true,
+      user: {
+        name: user.name,
+        email: user.email,
+      },
+    });
+  } catch (error) {
+    console.error("Error fetching profile:", error);
+    response.status(500).json({
+      success: false,
+      error: "Internal Server Error",
+    });
+  }
+});
+
 // Route to get all users' profile pictures, bio, and artist type
 router.get("/all-profile-pictures", async (request, response) => {
   try {
