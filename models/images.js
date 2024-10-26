@@ -5,7 +5,7 @@ import mongoose from "mongoose";
 const { Schema } = mongoose;
 
 // Define enum for image categories
-const CATEGORY = [
+export const IMAGE_CATEGORY = [
   'paintings',
   'photography',
   'graphic design',
@@ -14,10 +14,10 @@ const CATEGORY = [
   'woodwork',
   'graffiti',
   'stencil'
-]
+];
 
 const CATEGORY_ENUM = {
-  values: CATEGORY,
+  values: IMAGE_CATEGORY,
   message: 'Category should be one of the following: [Paintings, Photography, Graphic Design, Illustrations, Sculptures, Woodwork, Graffiti, Stencil]'
 }
 

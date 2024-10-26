@@ -22,9 +22,8 @@ const storage = multer.memoryStorage();
 // Create a multer instance with the storage configuration
 const upload = multer({ storage: storage });
 
-// load env variable
-import dotenv from 'dotenv';
-dotenv.config();
+// Import the category type enum
+import { IMAGE_CATEGORY } from '../../models/images.js';
 
 // POST route for uploading an image
 router.post(
@@ -90,8 +89,23 @@ router.post(
 // Route to get all images from the database
 router.get('/all_images', isUserAuthorized, async (request, response) => {
   try {
-    // Finding all image documents in the database
-    const images = await ImageModel.find({});
+    const query = {};
+    const category = request.query.category;
+
+    // if user has provided search category, validate the category type & update query
+    if(category){
+      if(!IMAGE_CATEGORY.includes(category)){
+        return response
+        .status(400)
+        .json({ success: false, error: 'Please provide a valid category' });
+      }
+      else{
+        query.category = category;
+      }
+    }
+
+    // Finding all image documents in the database that match the given query
+    const images = await ImageModel.find(query);
 
     // If no images are found, send a 404 response
     if (images.length === 0) {
