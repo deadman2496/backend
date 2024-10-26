@@ -8,8 +8,8 @@ import dotenv from "dotenv";
 // Load environment variables from the .env file
 dotenv.config();
 
-// Destructure the JWT_SECRET variable from the environment variables
-const { JWT_SECRET } = process.env;
+// Destructure the JWT_SECRET & CLOUDINARY_CLOUD variable from the environment variables
+const { JWT_SECRET, CLOUDINARY_CLOUD } = process.env;
 
 // Determine if the environment is production
 const isProduction = process.env.NODE_ENV === "production";
@@ -83,3 +83,15 @@ export const isUserAuthorized = async (request, response, next) => {
   // Respond with a 401 status and an error message if authorization fails
   return response.status(401).json({ success: false, error: "Unauthorized" });
 };
+
+// ensure price is a float
+export const validatePrice = (price) => {
+  const price_val = parseFloat(price);
+  return (isNaN(price_val) || !isFinite(price)) ? null : price_val;
+}
+
+// validate image link matches the Cloudinary secure_url
+export const validateImageLink = (imageLink) => {
+  const urlRegex = new RegExp(`^https:\/\/res\.cloudinary\.com\/${CLOUDINARY_CLOUD}\/image\/upload\/[a-zA-Z0-9]+\/[a-zA-Z0-9\\-_.]+\\.(jpg|jpeg|png|gif|bmp|webp)$`);
+  return (!urlRegex.test(imageLink)) ? null : imageLink;
+}

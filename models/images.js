@@ -4,6 +4,23 @@ import mongoose from "mongoose";
 // Destructure the Schema constructor from mongoose
 const { Schema } = mongoose;
 
+// Define enum for image categories
+const CATEGORY = [
+  'paintings',
+  'photography',
+  'graphic design',
+  'illustrations',
+  'sculptures',
+  'woodwork',
+  'graffiti',
+  'stencil'
+]
+
+const CATEGORY_ENUM = {
+  values: CATEGORY,
+  message: 'Category should be one of the following: [Paintings, Photography, Graphic Design, Illustrations, Sculptures, Woodwork, Graffiti, Stencil]'
+}
+
 // Define the ImageSchema using the Schema constructor
 const ImageSchema = new Schema(
   {
@@ -33,7 +50,7 @@ const ImageSchema = new Schema(
     },
     // Define the price field with type String and validation
     price: {
-      type: String,
+      type: Number,
       // price is required with a custom error message
       required: [true, "Price is required"],
 
@@ -41,6 +58,12 @@ const ImageSchema = new Schema(
       min: [1, "Price should be greater than $0.99"],
       // Maximum value of 1,000,000 with a custom error message
       max: [1000000, "Price should be less than $1,000,000"],
+      validate: {
+        validator: function(value) {
+          return 1000000 >= value >= 1;
+        },
+        message: 'Price must be a positive number from $1 to $1,000,000'
+      }
     },
     // Define the description field with type String and validation
     description: {
@@ -59,6 +82,12 @@ const ImageSchema = new Schema(
       default: 0,
       // viewCount field will not be selected by default in queries
       select: false,
+    },
+    // Define the category field with type String (required, can only be one of 8 category strings)
+    category: {
+      type: String,
+      required: [true, "Category is required"],
+      enum: CATEGORY_ENUM
     },
   },
   {
