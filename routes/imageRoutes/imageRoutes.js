@@ -11,7 +11,7 @@ import multer from 'multer';
 import ImageModel from '../../models/images.js';
 
 // Importing the isUserAuthorized function from the utils directory
-import { isUserAuthorized } from '../../utils/authUtils.js';
+import { isUserAuthorized, validatePrice, validateImageLink } from "../../utils/authUtils.js";
 
 // Create a router instance with the router configuration
 const router = express.Router();
@@ -22,36 +22,89 @@ const storage = multer.memoryStorage();
 // Create a multer instance with the storage configuration
 const upload = multer({ storage: storage });
 
+// Import the category type enum
+import { IMAGE_CATEGORY } from '../../models/images.js';
+
 // POST route for uploading an image
-router.post('/image', async (request, response) => {
-  try {
-    // Create a new image document in the database
-    const newImage = await ImageModel.create({
-      userId: request.body.userId,
-      artistName: request.body.artistName,
-      name: request.body.name,
-      imageLink: request.body.imageLink, // Make sure this matches the Cloudinary secure_url
-      price: request.body.price,
-      description: request.body.description,
-    });
-    console.log('New Image Saved:', newImage);
-    // Sending a success response after image upload
-    response.status(200).json({
-      success: true,
-      message: 'Image uploaded and saved successfully',
-    });
-  } catch (err) {
-    // Handling errors and sending an error response
-    console.error('Error Saving Image:', err);
-    response.status(500).json({ success: false, error: err.message });
+router.post(
+  "/image",
+  isUserAuthorized,
+  async (request, response) => {
+    try {
+      // Get the authenticated user's ID
+      const userId = request.user._id;
+
+      // validate data in backend
+      const { artistName, name, imageLink, price, description, category } = request.body;
+
+      if (!artistName || !name || !imageLink || !price || !description || !category) {
+        return response.status(400)
+        .json({ success: false, error: "Please fill in all fields, select a category, and select an image" });
+      }
+
+      // ensure price is a float
+      const price_val = validatePrice(price);
+      if(!price_val){
+        return response.status(400)
+        .json({ success: false, error: "Price should be a valid positive number" });
+      }
+
+      // ensure image link is valid & exists
+      if(!validateImageLink(imageLink)){
+        return response.status(400)
+        .json({ success: false, error: "Image must have valid link" });
+      }
+
+      const res = await fetch(imageLink);
+      if (res.status !== 200) {
+        return response.status(400)
+        .json({ success: false, error: "Image is not accessible" });
+      }
+
+      // Create a new image document in the database
+      const newImage = await ImageModel.create({
+        userId: userId,
+        artistName: artistName,
+        name: name,
+        imageLink: imageLink,  // Make sure this matches the Cloudinary secure_url
+        price: price_val,
+        description: description,
+        category: category,
+      });
+      console.log("New Image Saved:", newImage);
+
+      // Sending a success response after image upload
+      return response
+        .status(200)
+        .json({ success: true, image: newImage, message: "Image uploaded and saved successfully" });
+    } catch (err) {
+      // Handling errors and sending an error response
+      console.error("Error Saving Image:", err);
+      return response.status(500).json({ success: false, error: err.message });
+    }
   }
-});
+);
 
 // Route to get all images from the database
 router.get('/all_images', isUserAuthorized, async (request, response) => {
   try {
-    // Finding all image documents in the database
-    const images = await ImageModel.find({});
+    const query = {};
+    const category = request.query.category;
+
+    // if user has provided search category, validate the category type & update query
+    if(category){
+      if(!IMAGE_CATEGORY.includes(category)){
+        return response
+        .status(400)
+        .json({ success: false, error: 'Please provide a valid category' });
+      }
+      else{
+        query.category = category;
+      }
+    }
+
+    // Finding all image documents in the database that match the given query
+    const images = await ImageModel.find(query);
 
     // If no images are found, send a 404 response
     if (images.length === 0) {
@@ -69,6 +122,7 @@ router.get('/all_images', isUserAuthorized, async (request, response) => {
       price: image.price,
       imageLink: image.imageLink,
       viewCount: image.viewCount, // Include the view count
+      category: image.category,
     }));
 
     // Send the combined JSON response
@@ -109,6 +163,7 @@ router.get('/image/:id', isUserAuthorized, async (request, response) => {
       description: image.description,
       price: image.price,
       imageLink: image.imageLink,
+      category: image.category,
     };
 
     // Send the combined JSON response
@@ -140,9 +195,19 @@ router.patch(
           contentType: request.file.mimetype,
         };
       }
-      if (request.body.price) updateImage.price = request.body.price;
+      if (request.body.price){
+        // ensure price is a float
+        const price_val = validatePrice(request.body.price);
+        if(!price_val){
+          return response.status(400)
+          .json({ success: false, error: "Price should be a valid positive number" });
+        }
+        updateImage.price = price_val;
+      }
       if (request.body.description)
         updateImage.description = request.body.description;
+      if (request.body.category)
+        updateImage.category = request.body.category;
       // Increment the version key
       updateImage.$inc = { __v: 1 };
 
@@ -210,15 +275,15 @@ router.delete('/image/:id', isUserAuthorized, async (request, response) => {
 
     // Finding and deleting the image document in the database
     const deletedImage = await ImageModel.findOneAndDelete({
-      _id: imageId,
-      userId: userId,
-    });
+        _id: imageId,
+        userId: userId,
+      });
 
     // If the image is not found, sending a 404 response
     if (!deletedImage) {
       return response
         .status(404)
-        .json({ success: false, error: 'Image not found' });
+        .json({ success: false, error: "Image not found or not authorized to delete" });
     }
 
     // Sending a success response indicating the image was deleted
