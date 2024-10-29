@@ -78,6 +78,13 @@ router.post(
         .status(200)
         .json({ success: true, image: newImage, message: "Image uploaded and saved successfully" });
     } catch (err) {
+      // catch validation error from mongoose
+      if (err instanceof mongoose.Error.ValidationError) {
+        const errorMsg = Object.values(err.errors)
+        .map(error => error.message).join(', ');
+        return response.status(400).json({ success: false, error: errorMsg });
+      }
+
       // Handling errors and sending an error response
       console.error("Error Saving Image:", err);
       return response.status(500).json({ success: false, error: err.message });
@@ -123,6 +130,7 @@ router.get('/all_images', isUserAuthorized, async (request, response) => {
       imageLink: image.imageLink,
       viewCount: image.viewCount, // Include the view count
       category: image.category,
+      createdAt: image.createdAt,
     }));
 
     // Send the combined JSON response

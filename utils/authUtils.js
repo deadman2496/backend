@@ -90,11 +90,11 @@ export const isUserAuthorized = async (request, response, next) => {
 // ensure price is a float
 export const validatePrice = (price) => {
   const price_val = parseFloat(price);
-  return (isNaN(price_val) || !isFinite(price)) ? null : price_val;
+  return (isNaN(price_val) || !isFinite(price_val)) ? null : price_val;
 }
 
 // validate image link matches the Cloudinary secure_url
 export const validateImageLink = (imageLink) => {
-  const urlRegex = new RegExp(`^https:\/\/res\.cloudinary\.com\/${CLOUDINARY_CLOUD}\/image\/upload\/[a-zA-Z0-9]+\/[a-zA-Z0-9\\-_.]+\\.(jpg|jpeg|png|gif|bmp|webp)$`);
+  const urlRegex = new RegExp(`^https?:\/\/res\.cloudinary\.com\/${CLOUDINARY_CLOUD}\/image\/upload\/[a-zA-Z0-9]+\/(?:artwork\/)?[a-zA-Z0-9\-_.]+\.(jpg|jpeg|png|gif|bmp|webp)$`);
   return (!urlRegex.test(imageLink)) ? null : imageLink;
 }
