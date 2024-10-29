@@ -114,11 +114,11 @@ router.get('/all_images', isUserAuthorized, async (request, response) => {
     const images = await ImageModel.find(query);
 
     // If no images are found, send a 404 response
-    if (images.length === 0) {
-      return response
-        .status(404)
-        .json({ success: false, message: 'No images found' });
-    }
+    // if (images.length === 0) {
+    //   return response
+    //     .status(404)
+    //     .json({ success: false, message: 'No images found' });
+    // }
 
     // Prepare the response data with base64 encoded images
     const responseData = images.map((image) => ({

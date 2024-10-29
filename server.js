@@ -55,7 +55,7 @@ const customFormat =
   '[:date[clf]] :method :url :status :res[content-length] - :response-time ms';
 
 // Use Morgan middleware to log HTTP requests with the defined custom format
-app.use(morgan(customFormat));
+// app.use(morgan(customFormat));
 
 // Use user authentication routes for root path
 app.use('/', authRoutes);

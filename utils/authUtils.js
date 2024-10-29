@@ -51,14 +51,11 @@ export const isUserAuthorized = async (request, response, next) => {
   if (authHeader && authHeader.startsWith('Bearer ')) {
     const token = authHeader.replace('Bearer ', '');
 
-    console.log('users token before it checks: ', token);
     // If the token exists
     if (token) {
       try {
         // Verify the token using the JWT_SECRET
-        const data = jwt.verify(token, JWT_SECRET);
-        console.log('data during verification: ', data);
-        // If the data is not a string
+        const data = jwt.verify(token, JWT_SECRET); // If the data is not a string
         if (typeof data !== 'string') {
           // Find the user by ID from the token data
           const user = await UserModel.findById(data._id).catch((error) => {
