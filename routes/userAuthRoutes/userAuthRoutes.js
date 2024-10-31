@@ -487,5 +487,38 @@ router.get('/get-artist-type', isUserAuthorized, async (request, response) => {
   }
 });
 
+// Endpoint to increment profile picture views
+router.put('/increment-views/:userId', async (request, response) => {
+  try {
+    const { userId } = request.params;
+
+    // Find the user by userId
+    const user = await UserModel.findById(userId);
+
+    if (!user) {
+      return response.status(404).json({
+        success: false,
+        error: 'User not found',
+      });
+    }
+
+    // Increment the views count by 1
+    await user.incrementViews();
+
+    response.status(200).json({
+      success: true,
+      message: 'View count incremented successfully',
+      views: user.views,
+    });
+  } catch (error) {
+    console.error('Error incrementing views:', error);
+    response.status(500).json({
+      success: false,
+      error: 'Internal Server Error',
+    });
+  }
+});
+
+
 // Export the router
 export default router;

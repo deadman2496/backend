@@ -41,7 +41,6 @@ const UserSchema = new Schema(
     // Add a field for profile picture link
     profilePictureLink: {
       type: String,
-      // Optional field, can be null if the user doesn't have a profile picture
       default:
         'https://res.cloudinary.com/finzyphinzy/image/upload/v1729953534/artists/user.png',
     },
@@ -57,6 +56,10 @@ const UserSchema = new Schema(
       maxLength: [50, 'Artist type should be less than 50 characters'],
       default: null,
     },
+    views: {
+      type: Number,
+      default: 0,
+    }
   },
   {
     // Add timestamps for createdAt and updatedAt
@@ -74,9 +77,21 @@ UserSchema.pre('save', async function (next) {
   this.password = await hash(this.password, 10);
 });
 
-// Create the User model using the UserSchema, or retrieve it if it already exists
-const UserModel =
-  mongoose.models.UserModel || mongoose.model('User', UserSchema);
+// Increment the views count by 1
+UserSchema.methods.incrementViews = async function () {
+  this.views = (this.views) + 1;
+  await this.save();
+};
 
-// Export the User model
+// Create the User model using the UserSchema, or retrieve it if it already exists
+const UserModel = mongoose.models.User || mongoose.model('User', UserSchema);
+
+// Example usage in a route/controller (ensure this part is outside the schema definition)
+async function incrementUserViews(userId) {
+  const user = await UserModel.findById(userId); // Find the user by ID
+  if (user) {
+    await user.incrementViews(); // Increment views count
+  }
+}
+
 export default UserModel;
