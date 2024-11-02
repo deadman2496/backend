@@ -169,7 +169,7 @@ router.get('/all-profile-pictures', async (request, response) => {
     // Find all users and select the necessary fields: name, email, profilePictureLink, bio, and artistType
     const users = await UserModel.find(
       {},
-      { name: 1, email: 1, profilePictureLink: 1, bio: 1, artistType: 1 }
+      { name: 1, email: 1, profilePictureLink: 1, bio: 1, artistType: 1, userId: 1 }
     );
 
     // Check if any users exist in the database
@@ -488,37 +488,38 @@ router.get('/get-artist-type', isUserAuthorized, async (request, response) => {
 });
 
 // Endpoint to increment profile picture views
-router.put('/increment-views/:userId', async (request, response) => {
+// Route to increment views
+router.patch('/increment-views/:name', async (request, response) => {
   try {
-    const { userId } = request.params;
+    const { name } = request.params;
 
-    // Find the user by userId
-    const user = await UserModel.findById(userId);
+    // Use findOneAndUpdate if using a unique name, or switch back to findById if using _id
+    const updatedUser = await UserModel.findOneAndUpdate(
+      { name: name },
+      { $inc: { views: 1 } },
+      { new: true }  // Return the updated document
+    );
 
-    if (!user) {
+    if (!updatedUser) {
       return response.status(404).json({
         success: false,
         error: 'User not found',
       });
     }
 
-    // Increment the views count by 1
-    await user.incrementViews();
-
     response.status(200).json({
       success: true,
       message: 'View count incremented successfully',
-      views: user.views,
+      views: updatedUser.views,
     });
   } catch (error) {
-    console.error('Error incrementing views:', error);
+    console.error('Error incrementing views:', error.message);
     response.status(500).json({
       success: false,
       error: 'Internal Server Error',
     });
   }
 });
-
 
 // Export the router
 export default router;
