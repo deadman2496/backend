@@ -521,5 +521,30 @@ router.patch('/increment-views/:name', async (request, response) => {
   }
 });
 
+router.get('/get-views', async (req, res) => {
+  try {
+    const userId = req.user.id; // Assuming your middleware sets req.user.id based on the token
+    const user = await UserModel.findById(userId);
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        error: 'User not found',
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      views: user.views, // Return the views count from the user document
+    });
+  } catch (error) {
+    console.error('Error fetching views:', error.message);
+    res.status(500).json({
+      success: false,
+      error: 'Internal Server Error',
+    });
+  }
+});
+
 // Export the router
 export default router;
