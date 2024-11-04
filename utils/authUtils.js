@@ -92,6 +92,7 @@ export const validatePrice = (price) => {
 
 // validate image link matches the Cloudinary secure_url
 export const validateImageLink = (imageLink) => {
-  const urlRegex = new RegExp(`^https?\:\/\/res.cloudinary.com\/${CLOUDINARY_CLOUD}\/image\/upload(\/(.*))?\/(v[0-9]+)\/?(artwork)?\/(.+)(?:\.[a-z]{3})?$`);
+  // take cloudinery image w/ any name and extension (jpg,JPEG,etc.)
+  const urlRegex = new RegExp(`^https?\:\/\/res.cloudinary.com\/${CLOUDINARY_CLOUD}\/image\/upload(\/(.*))?\/(v[0-9]+)\/?(artwork)?\/(.+)(\.[a-z]{3,4})`);
   return (!urlRegex.test(imageLink)) ? null : imageLink;
 }
