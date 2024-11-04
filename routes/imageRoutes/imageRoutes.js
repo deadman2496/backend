@@ -52,7 +52,7 @@ router.post(
       // ensure image link is valid & exists
       if(!validateImageLink(imageLink)){
         return response.status(400)
-        .json({ success: false, error: "Image must have valid link" });
+        .json({ success: false, error: `Image link (${imageLink}) is not valid` });
       }
 
       const res = await fetch(imageLink);
