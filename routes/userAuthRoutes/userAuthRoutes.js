@@ -138,7 +138,7 @@ router.get('/get-profile', isUserAuthorized, async (request, response) => {
     const userId = request.user._id; // Get the authenticated user's ID
 
     // Find the user by their ID, select the necessary fields
-    const user = await UserModel.findById(userId, { name: 1, email: 1 });
+    const user = await UserModel.findById(userId, ['name', 'email', 'views']);
 
     if (!user) {
       return response.status(404).json({
@@ -152,6 +152,7 @@ router.get('/get-profile', isUserAuthorized, async (request, response) => {
       user: {
         name: user.name,
         email: user.email,
+        views: user.views,
       },
     });
   } catch (error) {
@@ -169,7 +170,14 @@ router.get('/all-profile-pictures', async (request, response) => {
     // Find all users and select the necessary fields: name, email, profilePictureLink, bio, and artistType
     const users = await UserModel.find(
       {},
-      { name: 1, email: 1, profilePictureLink: 1, bio: 1, artistType: 1, userId: 1 }
+      {
+        name: 1,
+        email: 1,
+        profilePictureLink: 1,
+        bio: 1,
+        artistType: 1,
+        userId: 1,
+      }
     );
 
     // Check if any users exist in the database
@@ -238,7 +246,6 @@ router.post('/profile-picture', async (request, response) => {
 // Route to get the user's profile picture based on userId
 router.get('/profile-picture/:userId', async (request, response) => {
   try {
-    console.log('i was invloved profile-picture-get ');
     const { userId } = request.params;
 
     // Find the user by their userId
@@ -258,7 +265,6 @@ router.get('/profile-picture/:userId', async (request, response) => {
         .json({ success: false, error: 'Profile picture not found' });
     }
 
-    console.log('profile picture link found');
     // Respond with the profile picture link
     response.status(200).json({
       success: true,
@@ -489,32 +495,76 @@ router.get('/get-artist-type', isUserAuthorized, async (request, response) => {
 
 // Endpoint to increment profile picture views
 // Route to increment views
-router.patch('/increment-views/:name', async (request, response) => {
-  try {
-    const { name } = request.params;
+// router.patch('/increment-views/:name', async (request, response) => {
+//   try {
+//     const { name } = request.params;
 
-    // Use findOneAndUpdate if using a unique name, or switch back to findById if using _id
-    const updatedUser = await UserModel.findOneAndUpdate(
-      { name: name },
+//     // Use findOneAndUpdate if using a unique name, or switch back to findById if using _id
+//     const updatedUser = await UserModel.findOneAndUpdate(
+//       { name: name },
+//       { $inc: { views: 1 } },
+//       { new: true } // Return the updated document
+//     );
+
+//     if (!updatedUser) {
+//       return response.status(404).json({
+//         success: false,
+//         error: 'User not found',
+//       });
+//     }
+
+//     response.status(200).json({
+//       success: true,
+//       message: 'View count incremented successfully',
+//       views: updatedUser.views,
+//     });
+//   } catch (error) {
+//     console.error('Error incrementing views:', error.message);
+//     response.status(500).json({
+//       success: false,
+//       error: 'Internal Server Error',
+//     });
+//   }
+// });
+
+router.patch('/increment-views/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // Validate the ID parameter
+    if (!id || typeof id !== 'string') {
+      return res.status(400).json({
+        success: false,
+        error: 'Invalid or missing user ID',
+      });
+    }
+
+    // Find user by ID and increment view count
+    const updatedUser = await UserModel.findByIdAndUpdate(
+      id,
       { $inc: { views: 1 } },
-      { new: true }  // Return the updated document
+      { new: true, runValidators: true } // Return the updated document with validators
     );
 
     if (!updatedUser) {
-      return response.status(404).json({
+      return res.status(404).json({
         success: false,
         error: 'User not found',
       });
     }
 
-    response.status(200).json({
+    // Return success response
+    res.status(200).json({
       success: true,
       message: 'View count incremented successfully',
-      views: updatedUser.views,
+      user: {
+        id: updatedUser._id,
+        views: updatedUser.views,
+      },
     });
   } catch (error) {
     console.error('Error incrementing views:', error.message);
-    response.status(500).json({
+    res.status(500).json({
       success: false,
       error: 'Internal Server Error',
     });
