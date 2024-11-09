@@ -76,12 +76,10 @@ const ImageSchema = new Schema(
       maxLength: [30, "Description should be less than 30 characters"],
     },
     // Define the viewCount field with type Number and a default value
-    viewCount: {
+    views: {
       type: Number,
       // Default value for viewCount is 0
       default: 0,
-      // viewCount field will not be selected by default in queries
-      select: false,
     },
     // Define the category field with type String (required, can only be one of 8 category strings)
     category: {

@@ -329,49 +329,102 @@ router.get('/images', isUserAuthorized, async (request, response) => {
   }
 });
 
+// // Route to update the view count of an image by id
+// router.patch('/viewcount/:id/', isUserAuthorized, async (request, response) => {
+//   try {
+//     // Getting the userId from the authenticated user
+//     const userId = request.user.id;
+//     // Getting the imageId from the request parameters
+//     const imageId = request.params.id;
+
+//     // Finding and updating the viewcount
+//     const increaseCount = await ImageModel.findOneAndUpdate(
+//       {
+//         _id: imageId,
+//         userId: userId,
+//       },
+//       {
+//         $inc: {
+//           viewCount: 1,
+//         },
+//       },
+//       // Return the updated document
+//       { new: true }
+//     );
+
+//     // Check if increaseCount is null (no document found)
+//     if (!increaseCount) {
+//       return response
+//         .status(404)
+//         .json({ success: false, error: 'Image with id not found' });
+//     }
+
+//     // If the image is found and the view count is increased
+//     return response
+//       .status(200)
+//       .json({ success: true, message: 'Image view count updated' });
+//   } catch (error) {
+//     // Logging the error to the console
+//     console.error('Error updating image view count:', error);
+//     // Sending an internal server error response to the client
+//     return response
+//       .status(500)
+//       .json({ success: false, error: 'Internal Server Error' });
+//   }
+// });
+
 // Route to update the view count of an image by id
-router.patch('/viewcount/:id/', isUserAuthorized, async (request, response) => {
+router.patch('/increment-image-views/:id', async (req, res) => {
   try {
-    // Getting the userId from the authenticated user
-    const userId = request.user.id;
-    // Getting the imageId from the request parameters
-    const imageId = request.params.id;
+    const { id } = req.params;
 
-    // Finding and updating the viewcount
-    const increaseCount = await ImageModel.findOneAndUpdate(
-      {
-        _id: imageId,
-        userId: userId,
-      },
-      {
-        $inc: {
-          viewCount: 1,
-        },
-      },
-      // Return the updated document
-      { new: true }
-    );
-
-    // Check if increaseCount is null (no document found)
-    if (!increaseCount) {
-      return response
-        .status(404)
-        .json({ success: false, error: 'Image with id not found' });
+    // Validate the ID parameter
+    if (!id || typeof id !== 'string') {
+      console.log("Invalid or missing image ID.");
+      return res.status(400).json({
+        success: false,
+        error: 'Invalid or missing image ID',
+      });
     }
 
-    // If the image is found and the view count is increased
-    return response
-      .status(200)
-      .json({ success: true, message: 'Image view count updated' });
+    console.log(`Received request to increment views for image ID: ${id}`);
+
+    // Find image by ID and increment view count
+    const updatedImage = await ImageModel.findByIdAndUpdate(
+      id,
+      { $inc: { views: 1 } },
+      { new: true, runValidators: true }
+    );
+
+    if (!updatedImage) {
+      console.log("Image not found.");
+      return res.status(404).json({
+        success: false,
+        error: 'Image not found',
+      });
+    }
+
+    console.log(`Incremented views for image ID: ${id}, new view count: ${updatedImage.views}`);
+    
+    res.status(200).json({
+      success: true,
+      message: 'Image view count incremented successfully',
+      image: {
+        id: updatedImage._id,
+        views: updatedImage.views,
+      },
+    });
   } catch (error) {
-    // Logging the error to the console
-    console.error('Error updating image view count:', error);
-    // Sending an internal server error response to the client
-    return response
-      .status(500)
-      .json({ success: false, error: 'Internal Server Error' });
+    console.error('Error incrementing image views:', error.message);
+    res.status(500).json({
+      success: false,
+      error: 'Internal Server Error',
+    });
   }
 });
+
+
+
 
 // Exporting the router as the default export
 export default router;
