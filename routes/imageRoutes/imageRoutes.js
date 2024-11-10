@@ -128,7 +128,7 @@ router.get('/all_images', isUserAuthorized, async (request, response) => {
       description: image.description,
       price: image.price,
       imageLink: image.imageLink,
-      viewCount: image.viewCount, // Include the view count
+      views: image.views, // Include the view count
       category: image.category,
       createdAt: image.createdAt,
     }));
@@ -172,6 +172,7 @@ router.get('/image/:id', isUserAuthorized, async (request, response) => {
       price: image.price,
       imageLink: image.imageLink,
       category: image.category,
+      views: image.views,
     };
 
     // Send the combined JSON response
@@ -423,6 +424,46 @@ router.patch('/increment-image-views/:id', async (req, res) => {
   }
 });
 
+// Route to get image views by image ID
+router.get('/get-image-views/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // Validate the ID parameter
+    if (!id || typeof id !== 'string') {
+      return res.status(400).json({
+        success: false,
+        error: 'Invalid or missing image ID',
+      });
+    }
+
+    // Find the image by ID
+    const image = await ImageModel.findById(id);
+
+    if (!image) {
+      return res.status(404).json({
+        success: false,
+        error: 'Image not found',
+      });
+    }
+
+    // Return the view count of the image
+    res.status(200).json({
+      success: true,
+      views: image.views, // Return the views count from the image document
+      image: {
+        id: image._id,
+        views: image.views,
+      },
+    });
+  } catch (error) {
+    console.error('Error fetching image views:', error.message);
+    res.status(500).json({
+      success: false,
+      error: 'Internal Server Error',
+    });
+  }
+});
 
 
 
