@@ -42,7 +42,7 @@ const UserSchema = new Schema(
     profilePictureLink: {
       type: String,
       default:
-        'https://res.cloudinary.com/finzyphinzy/image/upload/v1729953534/artists/user.png',
+        'https://res.cloudinary.com/dttomxwev/image/upload/v1731113780/quisplf7viuudtptaund',
     },
     // Add the bio field with type String and a maximum length
     bio: {
