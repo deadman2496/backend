@@ -493,40 +493,6 @@ router.get('/get-artist-type', isUserAuthorized, async (request, response) => {
   }
 });
 
-// Endpoint to increment profile picture views
-// Route to increment views
-// router.patch('/increment-views/:name', async (request, response) => {
-//   try {
-//     const { name } = request.params;
-
-//     // Use findOneAndUpdate if using a unique name, or switch back to findById if using _id
-//     const updatedUser = await UserModel.findOneAndUpdate(
-//       { name: name },
-//       { $inc: { views: 1 } },
-//       { new: true } // Return the updated document
-//     );
-
-//     if (!updatedUser) {
-//       return response.status(404).json({
-//         success: false,
-//         error: 'User not found',
-//       });
-//     }
-
-//     response.status(200).json({
-//       success: true,
-//       message: 'View count incremented successfully',
-//       views: updatedUser.views,
-//     });
-//   } catch (error) {
-//     console.error('Error incrementing views:', error.message);
-//     response.status(500).json({
-//       success: false,
-//       error: 'Internal Server Error',
-//     });
-//   }
-// });
-
 router.patch('/increment-views/:id', async (req, res) => {
   try {
     const { id } = req.params;
@@ -593,6 +559,25 @@ router.get('/get-views', async (req, res) => {
       success: false,
       error: 'Internal Server Error',
     });
+  }
+});
+
+// Endpoint to update accountType
+router.post('/accountType', isUserAuthorized, async (req, res) => {
+  const userId = req.user.id;
+  const accountType = req.body;
+  console.log(userId, accountType);
+
+  try {
+    const user = UserModel.findById(userId);
+    user.accountType = accountType;
+    user.save();
+
+    res.status(200).json({ success: true, accountType });
+  } catch (error) {
+    res
+      .status(500)
+      .json({ success: false, message: 'Failed to update account type' });
   }
 });
 
