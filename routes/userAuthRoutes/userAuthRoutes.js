@@ -55,7 +55,9 @@ router.post('/signup', async (request, response) => {
 
     console.log('New user created successfully');
 
-    response.status(200).json({ success: true, message: 'Signup successful' });
+    response
+      .status(200)
+      .json({ success: true, message: 'Signup successful', user: newUser });
   } catch (error) {
     if (error instanceof mongoose.Error.ValidationError) {
       for (let field in error.errors) {
@@ -565,19 +567,26 @@ router.get('/get-views', async (req, res) => {
 // Endpoint to update accountType
 router.post('/accountType', isUserAuthorized, async (req, res) => {
   const userId = req.user.id;
-  const accountType = req.body;
-  console.log(userId, accountType);
+  const { accountType } = req.body;
+  console.log('userId, accountType', userId, accountType);
 
   try {
-    const user = UserModel.findById(userId);
+    const user = await UserModel.findById(userId);
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
     user.accountType = accountType;
-    user.save();
+    await user.save();
 
     res.status(200).json({ success: true, accountType });
   } catch (error) {
-    res
-      .status(500)
-      .json({ success: false, message: 'Failed to update account type' });
+    res.status(500).json({
+      success: false,
+      message: 'Failed to update account type',
+      error,
+    });
   }
 });
 
