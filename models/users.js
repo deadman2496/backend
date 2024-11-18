@@ -59,7 +59,16 @@ const UserSchema = new Schema(
     views: {
       type: Number,
       default: 0,
-    }
+    },
+    accountType: {
+      type: String,
+      enum: {
+        values: ['artist', 'art-lover'],
+        message:
+          '{VALUE} is not a valid account type. Choose either "artist" or "art-lover".',
+      },
+      default: null,
+    },
   },
   {
     // Add timestamps for createdAt and updatedAt
@@ -79,7 +88,7 @@ UserSchema.pre('save', async function (next) {
 
 // Increment the views count by 1
 UserSchema.methods.incrementViews = async function () {
-  this.views = (this.views) + 1;
+  this.views = this.views + 1;
   await this.save();
 };
 
