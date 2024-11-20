@@ -7,7 +7,7 @@ import mongoose from 'mongoose';
 // Import cookie-parser middleware for parsing cookies
 import cookieParser from 'cookie-parser';
 
-// Import morgan for loggin requests
+// Import morgan for logging requests
 import morgan from 'morgan';
 
 // Import authentication routes
@@ -15,6 +15,9 @@ import authRoutes from './routes/userAuthRoutes/userAuthRoutes.js';
 
 // Import image handling routes
 import imageRoutes from './routes/imageRoutes/imageRoutes.js';
+
+// Import order handling routes
+// import orderRoutes from './routes/orderRoutes/orderRoutes.js'; // New import
 
 // Import the MongoDB connection URL from config file
 import { MONGO_URL } from './config/config.js';
@@ -27,6 +30,9 @@ import cors from 'cors';
 
 // Import dotenv
 import dotenv from 'dotenv';
+
+// Load environment variables
+dotenv.config();
 
 // Load corsOrigin
 const corsOrigin = process.env.CORS_ORIGIN;
@@ -55,13 +61,16 @@ const customFormat =
   '[:date[clf]] :method :url :status :res[content-length] - :response-time ms';
 
 // Use Morgan middleware to log HTTP requests with the defined custom format
-// app.use(morgan(customFormat));
+app.use(morgan(customFormat));
 
-// Use user authentication routes for root path
+// Use authentication routes for root path
 app.use('/', authRoutes);
 
 // Use image routes for root path
 app.use('/', imageRoutes);
+
+// Use order routes for root path
+// app.use('/api/orders', orderRoutes); // New route for orders
 
 // Middleware to parse URL-encoded bodies in incoming requests
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -70,31 +79,28 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
 // Define the server port number
-const PORT = 4000;
+const PORT = process.env.PORT || 4000;
 
 // Connect to MongoDB using Mongoose
 mongoose
   // Connect to MongoDB using the provided URL
   .connect(MONGO_URL)
   // Log successful connection
-  .then(() => console.log('connection successful'))
+  .then(() => console.log('MongoDB connection successful'))
   // Handle connection errors
   .catch((error) => {
     // Log the error
-    console.log('error connecting to mongodb', error);
+    console.error('Error connecting to MongoDB:', error);
     // Exit the process with an error code
     process.exit(1);
   });
 
 // Default server route
-// request = request, response = response
-app.get('/', (request, response) => {
-  // Send a JSON response indicating the server is running
-  response.send({ status: 'Server is running' });
+app.get('/', (req, res) => {
+  res.send({ status: 'Server is running' });
 });
 
 // Start the server and listen on the defined port
 app.listen(PORT, () => {
-  // Log the server's URL
   console.log(`Server running at http://localhost:${PORT}`);
 });
