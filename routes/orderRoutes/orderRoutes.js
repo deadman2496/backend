@@ -4,10 +4,6 @@ import { isUserAuthorized } from '../../utils/authUtils.js';
 
 const router = express.Router();
 
-/**
- * Create a new order
- * POST /api/orders
- */
 router.post('/', isUserAuthorized, async (req, res) => {
   try {
     const { artName, deliveryDetails } = req.body;

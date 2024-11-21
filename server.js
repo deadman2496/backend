@@ -17,7 +17,7 @@ import authRoutes from './routes/userAuthRoutes/userAuthRoutes.js';
 import imageRoutes from './routes/imageRoutes/imageRoutes.js';
 
 // Import order handling routes
-// import orderRoutes from './routes/orderRoutes/orderRoutes.js'; // New import
+import orderRoutes from './routes/orderRoutes/orderRoutes.js'; // New import
 
 // Import the MongoDB connection URL from config file
 import { MONGO_URL } from './config/config.js';
@@ -70,7 +70,7 @@ app.use('/', authRoutes);
 app.use('/', imageRoutes);
 
 // Use order routes for root path
-// app.use('/api/orders', orderRoutes); // New route for orders
+app.use('/', orderRoutes); // New route for orders
 
 // Middleware to parse URL-encoded bodies in incoming requests
 app.use(bodyParser.urlencoded({ extended: false }));
