@@ -1,10 +1,10 @@
 import express from 'express';
-import OrderModel from '../../models/order.js';
+import OrderModel from '../../models/orders.js';
 import { isUserAuthorized } from '../../utils/authUtils.js';
 
 const router = express.Router();
 
-router.post('/', isUserAuthorized, async (req, res) => {
+router.post('/order', isUserAuthorized, async (req, res) => {
   try {
     const { artName, deliveryDetails } = req.body;
 
