@@ -19,6 +19,8 @@ router.post('/order', isUserAuthorized, async (req, res) => {
     // Create the order
     const newOrder = new OrderModel({
       artName,
+      userAccountName: req.user.name, // Extract account name from req.user
+      userId: req.user._id, // Extract user ID from req.user
       deliveryDetails,
     });
 
@@ -37,5 +39,6 @@ router.post('/order', isUserAuthorized, async (req, res) => {
     });
   }
 });
+
 
 export default router;
