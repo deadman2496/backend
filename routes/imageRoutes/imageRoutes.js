@@ -7,6 +7,10 @@ import mongoose from 'mongoose';
 // Importing the multer module
 import multer from 'multer';
 
+import Stripe from 'stripe';
+
+const stripe = Stripe("your-secret-key");
+
 // Importing the ImageModel from the models directory
 import ImageModel from '../../models/images.js';
 
@@ -465,7 +469,29 @@ router.get('/get-image-views/:id', async (req, res) => {
   }
 });
 
+router.post("/create-payment-intent", async (req, res) => {
+  try {
+    const { amount, currency } = req.body;
 
+    // Validate the input
+    if (!amount || !currency) {
+      return res.status(400).json({ error: "Amount and currency are required" });
+    }
+
+    // Create the PaymentIntent
+    const paymentIntent = await stripe.paymentIntents.create({
+      amount, // Amount in the smallest currency unit (e.g., cents for USD)
+      currency,
+      payment_method_types: ["card"],
+    });
+
+    // Respond with the client secret
+    res.status(200).json({ clientSecret: paymentIntent.client_secret });
+  } catch (error) {
+    console.error("Error creating PaymentIntent:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
 
 // Exporting the router as the default export
 export default router;
