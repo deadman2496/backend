@@ -79,7 +79,7 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
 // Define the server port number
-const PORT = process.env.PORT || 4000;
+const PORT = process.env.BACKEND_PORT || 4000;
 
 // Connect to MongoDB using Mongoose
 mongoose
