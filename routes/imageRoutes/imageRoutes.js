@@ -465,7 +465,5 @@ router.get('/get-image-views/:id', async (req, res) => {
   }
 });
 
-
-
 // Exporting the router as the default export
 export default router;
